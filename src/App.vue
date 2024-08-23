@@ -9,10 +9,9 @@ import { defineComponent } from 'vue';
 import ImageGenerator from './components/ImageGenerator.vue';
 
 export default defineComponent({
-  name: 'App',
   components: {
-    ImageGenerator
-  }
+    ImageGenerator,
+  },
 });
 </script>
 
@@ -24,5 +23,6 @@ export default defineComponent({
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+  max-width: 1024px;
 }
 </style>

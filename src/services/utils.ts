@@ -1,7 +1,14 @@
 // utils.ts
+
+/**
+ * Generates a UUID v4 string.
+ * 
+ * @returns {string} A UUID string in the format 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.
+ */
 export function generateUUID(): string {
     let d = new Date().getTime();
     let d2 = (performance && performance.now && (performance.now() * 1000)) || 0;
+
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
         let r = Math.random() * 16;
         if (d > 0) {
