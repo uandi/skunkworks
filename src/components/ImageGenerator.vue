@@ -1,307 +1,215 @@
 <template>
-	<div>
-		<h1>skunkworks</h1>
-		<form id="text-form" @submit.prevent="handleSubmit">
-			<label for="text-input">Enter your text:</label>
-			<input type="text" v-model="textInput" id="text-input" required />
+	<div class="flex flex-col items-center justify-center min-h-screen bg-gray-900">
+		<h1 class="text-4xl font-bold mb-8 text-white text-start">Image Generator</h1>
 
-			<label for="model-select">Choose Model:</label>
-			<select id="model-select" v-model="model">
-				<option value="civitai:158441@358398">Model A</option>
-				<option value="anotherModel:123456">Model B</option>
-			</select>
+		<!-- Flex container for form and image output -->
+		<div class="flex flex-row items-start justify-between space-x-8">
+			<!-- Form Section -->
+			<form @submit.prevent="handleSubmit" class="bg-gray-800 p-6 rounded-lg shadow-lg w-96 space-y-4">
+				<!-- Textarea for Prompt -->
+				<div>
+					<label for="text-input" class="block text-sm font-medium mb-2 text-gray-200">Enter your
+						text:</label>
+					<textarea v-model="textInput" id="text-input" rows="4"
+						class="w-full p-2 border border-gray-700 rounded bg-gray-900 text-white focus:outline-none focus:ring focus:ring-indigo-500 resize-none"
+						required></textarea>
+				</div>
 
-			<label for="steps-input">Steps:</label>
-			<input type="number" v-model="steps" id="steps-input" value="10" min="1" max="50">
+				<!-- Model Selection -->
+				<div>
+					<label for="model-select" class="block text-sm font-medium mb-2 text-gray-200">Choose Model:</label>
+					<select v-model="model" id="model-select"
+						class="w-full p-2 border border-gray-700 rounded bg-gray-900 text-white focus:outline-none focus:ring focus:ring-indigo-500">
+						<option value="civitai:158441@358398">epiCRealism</option>
+						<option value="civitai:204099@375938">JJ's Interior Space</option>
+					</select>
+				</div>
 
-			<label for="dimension-width">Width:</label>
-			<input type="number" v-model="width" id="dimension-width" value="512" min="64" max="1024">
+				<!-- Steps Input -->
+				<div>
+					<label for="steps-input" class="block text-sm font-medium mb-2 text-gray-200">Steps:</label>
+					<input type="number" v-model="steps" id="steps-input"
+						class="w-full p-2 border border-gray-700 rounded bg-gray-900 text-white focus:outline-none focus:ring focus:ring-indigo-500"
+						min="1" max="50" />
+				</div>
 
-			<label for="dimension-height">Height:</label>
-			<input type="number" v-model="height" id="dimension-height" value="512" min="64" max="1024">
+				<!-- Width Input -->
+				<!-- <div>
+					<label for="dimension-width" class="block text-sm font-medium mb-2 text-gray-200">Width:</label>
+					<input type="number" v-model="width" id="dimension-width"
+						class="w-full p-2 border border-gray-700 rounded bg-gray-900 text-white focus:outline-none focus:ring focus:ring-indigo-500"
+						min="64" max="1024" />
+				</div> -->
 
-			<button type="submit" :disabled="loading">Generate Image</button>
-		</form>
+				<!-- Height Input -->
+				<!-- <div>
+					<label for="dimension-height" class="block text-sm font-medium mb-2 text-gray-200">Height:</label>
+					<input type="number" v-model="height" id="dimension-height"
+						class="w-full p-2 border border-gray-700 rounded bg-gray-900 text-white focus:outline-none focus:ring focus:ring-indigo-500"
+						min="64" max="1024" />
+				</div> -->
 
-		<div v-if="loading" id="loading-indicator">
-			<span>Processing...</span>
+				<!-- Generate Button -->
+				<button type="submit" :disabled="loading"
+					class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 rounded text-white font-semibold disabled:opacity-50">
+					Generate Image
+				</button>
+			</form>
+
+			<!-- Image Output -->
+			<div id="image-output" class="flex items-center justify-center bg-gray-800 rounded-lg shadow-lg w-96 h-96">
+				<!-- Display generated image or placeholder if image is not yet generated -->
+				<div v-if="imageUrl">
+					<img :src="imageUrl || undefined" alt="Generated Image"
+						class="rounded shadow-lg max-h-full max-w-full" />
+				</div>
+				<div v-else class="text-gray-500 text-center">
+					<p>No image generated yet.</p>
+				</div>
+			</div>
 		</div>
 
-		<div v-if="imageUrl" id="image-output">
-			<img id="generated-img" class="rounded cursor-pointer" :src="imageUrl" alt="Generated Image"
-				@click="openLightbox" />
+		<!-- Loading Indicator -->
+		<div v-if="loading" id="loading-indicator" class="mt-6 text-indigo-400">
+			{{ loadingAnimation }} Processing...
 		</div>
 
-		<div id="image-actions" v-if="imageUrl">
-			<button id="download-btn" @click="downloadImage">Download Image</button>
-			<button id="share-btn" @click="shareImage">Share Image</button>
-		</div>
-
-		<div id="status-messages" class="text-right text-gray-400 mt-2">
-			<p v-for="message in statusMessage.split('\n')" :key="message">{{ message }}</p>
+		<!-- Status Message -->
+		<div v-if="statusMessage" class="mt-4 text-gray-400 text-sm">
+			<p>{{ statusMessage }}</p>
 		</div>
 	</div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, onMounted } from 'vue';
 import { initializeWebSocket } from '../services/websocket';
 import { generateUUID } from '../services/utils';
+import { WebSocketResponse } from '../services/types';
 
 export default defineComponent({
-		setup() {
-	const textInput = ref('');
-	const model = ref('civitai:158441@358398');
-	const steps = ref(15);
-	const width = ref(512);
-	const height = ref(512);
-	const imageUrl = ref<string | null>(null);
-	const loading = ref(false);
-	const statusMessage = ref('');
-	const isLightboxVisible = ref(false);
-	let ws: WebSocket;
+	setup() {
+		const textInput = ref('');
+		const model = ref('civitai:158441@358398');
+		const steps = ref(10);
+		const width = ref(512);
+		const height = ref(512);
+		const imageUrl = ref<string | null>(null);
+		const loading = ref(false);
+		const statusMessage = ref('');
+		const loadingAnimation = ref(''); // This will hold the current frame of the animation
+		let ws: WebSocket;
+		let timeoutId: number | null = null;
+		let animationInterval: number | null = null;
 
-	const updateStatusMessage = (message: string) => {
-		statusMessage.value += `${message}\n`;
-	};
-
-	const downloadImage = () => {
-		const a = document.createElement('a');
-		a.href = imageUrl.value!;
-		a.download = 'generated_image.jpg';
-		a.click();
-	};
-
-	const shareImage = () => {
-		if (navigator.share) {
-		navigator.share({
-			title: 'Generated Image',
-			url: imageUrl.value!,
-		}).then(() => {
-			console.log('Thanks for sharing!');
-		}).catch(console.error);
-		} else {
-		alert('Sharing is not supported in this browser.');
-		}
-	};
-
-	const openLightbox = () => {
-		isLightboxVisible.value = true;
-	};
-
-	const closeLightbox = () => {
-		isLightboxVisible.value = false;
-	};
-
-	const handleSubmit = () => {
-		loading.value = true;
-		imageUrl.value = null;  // Clear previous image
-
-		const imageRequest = {
-		taskType: 'imageInference',
-		taskUUID: generateUUID(),
-		outputType: 'URL',
-		outputFormat: 'JPG',
-		positivePrompt: textInput.value,
-		height: height.value,
-		width: width.value,
-		model: model.value,
-		steps: steps.value,
-		CFGScale: 8.0,
-		numberResults: 1,
+		const updateStatusMessage = (message: string) => {
+			statusMessage.value = message;
 		};
 
-		updateStatusMessage('Sending image generation request...');
-		ws.send(JSON.stringify([imageRequest]));
-	};
+		const startLoadingAnimation = () => {
+			const frames = ['.  ', '.. ', '...', ' ..', '  .', '   ']; // Dots Spinner
+			let frameIndex = 0;
 
-	const handleImageResponse = (response: any) => {
-		if (response.data && response.data[0].taskType === 'imageInference') {
-		const imageUrlFromResponse = response.data[0].imageURL;
-		if (imageUrlFromResponse) {
-			updateStatusMessage('Image generated successfully!');
-			imageUrl.value = imageUrlFromResponse;
+			animationInterval = window.setInterval(() => {
+				loadingAnimation.value = frames[frameIndex];
+				frameIndex = (frameIndex + 1) % frames.length;
+			}, 200); // Change frame every 200ms
+		};
+
+		const stopLoadingAnimation = () => {
+			if (animationInterval !== null) {
+				clearInterval(animationInterval);
+				animationInterval = null;
+				loadingAnimation.value = ''; // Clear the animation
+			}
+		};
+
+		const resetLoadingState = () => {
 			loading.value = false;
-		} else {
-			updateStatusMessage('Failed to generate image. Please try again.');
-			loading.value = false;
-		}
-		}
-	};
+			stopLoadingAnimation();
+			if (timeoutId !== null) {
+				clearTimeout(timeoutId);
+				timeoutId = null;
+			}
+		};
 
-	// Reconnection logic
-	let reconnectAttempts = 0;
-	const maxReconnectAttempts = 5;
+		const handleSubmit = () => {
+			if (loading.value) {
+				updateStatusMessage('Please wait for the current request to complete.');
+				return;
+			}
 
-	function connectWebSocket() {
-		ws = initializeWebSocket(handleImageResponse, () => {
-		updateStatusMessage('Authenticated successfully.');
-		reconnectAttempts = 0; // Reset attempts after successful connection
+			loading.value = true;
+			imageUrl.value = null;
+
+			const imageRequest = {
+				taskType: 'imageInference',
+				taskUUID: generateUUID(),
+				outputType: 'URL',
+				outputFormat: 'JPG',
+				positivePrompt: textInput.value,
+				height: height.value,
+				width: width.value,
+				model: model.value,
+				steps: steps.value,
+				CFGScale: 8.0,
+				numberResults: 1,
+			};
+
+			updateStatusMessage('Sending image generation request...');
+			ws.send(JSON.stringify([imageRequest]));
+
+			updateStatusMessage('Image request successfully sent. Processing...');
+			startLoadingAnimation(); // Start the loading animation
+
+			// Set a timeout to handle unresponsive requests
+			timeoutId = window.setTimeout(() => {
+				updateStatusMessage('Request timed out. Please try again.');
+				resetLoadingState();
+			}, 30000); // 30 seconds timeout
+		};
+
+		const handleImageResponse = (response: WebSocketResponse) => {
+			if (response.data && response.data[0].taskType === 'imageInference') {
+				const imageUrlFromResponse = response.data[0].imageURL;
+				if (imageUrlFromResponse) {
+					updateStatusMessage('Image generated successfully!');
+					imageUrl.value = imageUrlFromResponse;
+					resetLoadingState();
+				} else {
+					updateStatusMessage('Failed to generate image. Please try again.');
+					resetLoadingState();
+				}
+			}
+		};
+
+		onMounted(() => {
+			ws = initializeWebSocket(handleImageResponse, () => {
+				updateStatusMessage('Authenticated successfully.');
+			});
+
+			// Ping every 60 seconds to keep WebSocket connection alive
+			setInterval(() => {
+				if (ws.readyState === WebSocket.OPEN) {
+					const pingMessage = { taskType: 'ping', ping: true };
+					ws.send(JSON.stringify([pingMessage]));
+					updateStatusMessage('Ping message sent to keep connection alive.');
+				}
+			}, 60000);
 		});
 
-		ws.onclose = () => {
-		if (reconnectAttempts < maxReconnectAttempts) {
-			const timeout = Math.pow(2, reconnectAttempts) * 1000; // Exponential backoff
-			setTimeout(() => {
-			reconnectAttempts++;
-			updateStatusMessage(`Reconnecting... Attempt ${reconnectAttempts}`);
-			connectWebSocket();
-			}, timeout);
-		} else {
-			updateStatusMessage('Failed to reconnect after several attempts.');
-		}
+		return {
+			textInput,
+			model,
+			steps,
+			width,
+			height,
+			imageUrl,
+			loading,
+			statusMessage,
+			loadingAnimation,
+			handleSubmit,
 		};
-	}
-
-	// Initially connect WebSocket
-	connectWebSocket();
-
-	// Ping every 60 seconds to keep WebSocket connection alive
-	setInterval(() => {
-		if (ws.readyState === WebSocket.OPEN) {
-		const pingMessage = { taskType: 'ping', ping: true };
-		ws.send(JSON.stringify([pingMessage]));
-		updateStatusMessage('Ping message sent to keep connection alive.');
-		}
-	}, 60000); // 60 seconds interval
-
-	return {
-		textInput,
-		model,
-		steps,
-		width,
-		height,
-		imageUrl,
-		loading,
-		statusMessage,
-		isLightboxVisible,
-		downloadImage,
-		shareImage,
-		openLightbox,
-		closeLightbox,
-		handleSubmit,
-		updateStatusMessage,
-	};
 	},
 });
 </script>
-
-<style scoped>
-/* Add your styles here */
-body {
-	font-family: 'Roboto', sans-serif;
-	background-color: #000;
-	color: #fff;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	max-width: 1024px;
-}
-
-h1 {
-	text-align: left;
-	margin-bottom: 2rem;
-	font-size: 2rem;
-	font-weight: 700;
-}
-
-form {
-	display: flex;
-	flex-direction: column;
-	width: 100%;
-}
-
-label,
-input,
-select,
-button {
-	width: 100%;
-	margin-bottom: 1rem;
-}
-
-label {
-	text-align: left;
-	font-size: 1rem;
-	font-weight: 400;
-}
-
-input,
-select {
-	background-color: #fff;
-	color: #000;
-	border: 1px solid #444;
-	padding: 0.5rem;
-	border-radius: 0.25rem;
-}
-
-button {
-	background-color: #000;
-	color: #fff;
-	border: 1px solid #444;
-	padding: 0.75rem;
-	border-radius: 0.25rem;
-	cursor: pointer;
-	transition: background-color 0.3s ease;
-}
-
-button:hover {
-	background-color: #333;
-}
-
-#loading-indicator {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	gap: 0.5rem;
-	text-align: left;
-}
-
-#image-output {
-	margin-top: 2rem;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	border: 1px dashed #444;
-	padding: 2rem;
-	border-radius: 0.25rem;
-	width: 300px;
-	height: 300px;
-}
-
-#image-actions {
-	display: flex;
-	justify-content: space-between;
-	margin-top: 1rem;
-	width: 300px;
-}
-
-#lightbox {
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	background-color: rgba(0, 0, 0, 0.8);
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	z-index: 50;
-	padding: 2rem;
-}
-
-#lightbox img {
-	max-width: 100%;
-	max-height: 100%;
-}
-
-#close-lightbox {
-	position: absolute;
-	top: 1rem;
-	left: 1rem;
-	font-size: 1.5rem;
-	background: transparent;
-	border: none;
-	color: #fff;
-	cursor: pointer;
-}
-</style>
