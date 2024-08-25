@@ -1,6 +1,8 @@
 <template>
 	<div class="flex flex-col items-center justify-center min-h-screen bg-gray-900">
-		<h1 class="text-4xl font-bold mb-8 text-white text-start">Image Generator</h1>
+		<div class="items-start">
+			<h1 class="text-4xl font-bold mb-8 text-white text-start"></h1>
+		</div>
 
 		<!-- Flex container for form and image output -->
 		<div class="flex flex-row items-start justify-between space-x-8">
@@ -8,10 +10,9 @@
 			<form @submit.prevent="handleSubmit" class="bg-gray-800 p-6 rounded-lg shadow-lg w-96 space-y-4">
 				<!-- Textarea for Prompt -->
 				<div>
-					<label for="text-input" class="block text-sm font-medium mb-2 text-gray-200">Enter your
-						text:</label>
+					<label for="text-input" class="block text-sm font-medium mb-2 text-gray-200">Enter your text:</label>
 					<textarea v-model="textInput" id="text-input" rows="4"
-						class="w-full p-2 border border-gray-700 rounded bg-gray-900 text-white focus:outline-none focus:ring focus:ring-indigo-500 resize-none"
+						class="w-full p-2 border border-gray-700 rounded bg-gray-900 text-white focus:outline-none focus:ring focus:ring-gray-500 resize-none"
 						required></textarea>
 				</div>
 
@@ -19,7 +20,7 @@
 				<div>
 					<label for="model-select" class="block text-sm font-medium mb-2 text-gray-200">Choose Model:</label>
 					<select v-model="model" id="model-select"
-						class="w-full p-2 border border-gray-700 rounded bg-gray-900 text-white focus:outline-none focus:ring focus:ring-indigo-500">
+						class="w-full p-2 border border-gray-700 rounded bg-gray-900 text-white focus:outline-none focus:ring focus:ring-gray-500">
 						<option value="civitai:158441@358398">epiCRealism</option>
 						<option value="civitai:204099@375938">JJ's Interior Space</option>
 					</select>
@@ -29,29 +30,13 @@
 				<div>
 					<label for="steps-input" class="block text-sm font-medium mb-2 text-gray-200">Steps:</label>
 					<input type="number" v-model="steps" id="steps-input"
-						class="w-full p-2 border border-gray-700 rounded bg-gray-900 text-white focus:outline-none focus:ring focus:ring-indigo-500"
+						class="w-full p-2 border border-gray-700 rounded bg-gray-900 text-white focus:outline-none focus:ring focus:ring-gray-500"
 						min="1" max="50" />
 				</div>
 
-				<!-- Width Input -->
-				<!-- <div>
-					<label for="dimension-width" class="block text-sm font-medium mb-2 text-gray-200">Width:</label>
-					<input type="number" v-model="width" id="dimension-width"
-						class="w-full p-2 border border-gray-700 rounded bg-gray-900 text-white focus:outline-none focus:ring focus:ring-indigo-500"
-						min="64" max="1024" />
-				</div> -->
-
-				<!-- Height Input -->
-				<!-- <div>
-					<label for="dimension-height" class="block text-sm font-medium mb-2 text-gray-200">Height:</label>
-					<input type="number" v-model="height" id="dimension-height"
-						class="w-full p-2 border border-gray-700 rounded bg-gray-900 text-white focus:outline-none focus:ring focus:ring-indigo-500"
-						min="64" max="1024" />
-				</div> -->
-
 				<!-- Generate Button -->
 				<button type="submit" :disabled="loading"
-					class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 rounded text-white font-semibold disabled:opacity-50">
+					class="w-full py-2 bg-gray-700 hover:bg-gray-600 rounded text-white font-semibold disabled:opacity-50">
 					Generate Image
 				</button>
 			</form>
@@ -70,7 +55,7 @@
 		</div>
 
 		<!-- Loading Indicator -->
-		<div v-if="loading" id="loading-indicator" class="mt-6 text-indigo-400">
+		<div v-if="loading" id="loading-indicator" class="mt-6 text-gray-400">
 			{{ loadingAnimation }} Processing...
 		</div>
 
