@@ -1,12 +1,13 @@
 // src/services/types.ts
 
 export interface WebSocketResponse {
-	data: Array<{
-	  taskType: string;
-	  connectionSessionUUID?: string;
-	  imageURL?: string;
-	}>;
-  }
+    data: Array<{
+        taskType: string;
+        connectionSessionUUID?: string;
+        imageURL?: string;
+        taskUUID?: string;  // Add this line to include taskUUID
+    }>;
+}
   
   export interface AuthMessage {
 	taskType: string;
