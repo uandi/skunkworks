@@ -19,6 +19,9 @@
 					<select v-model="model" id="model-select" class="select-input">
 						<option value="civitai:158441@358398">epiCRealism</option>
 						<option value="civitai:12597@14856">JJ's Interior Space</option>
+						<option value="civitai:158441@358398">SocaRealism XL</option>
+						<option value="civitai:12597@14856">墨心 MoXin</option>
+						<option value="civitai:133005@471120">Juggernaut XL</option>
 					</select>
 				</div>
 
@@ -34,16 +37,9 @@
 				</div>
 
 				<div>
-    <label for="steps-input" class="input-label">Steps: {{ steps }}</label>
-    <input 
-      type="range" 
-      v-model="steps" 
-      id="steps-input" 
-      class="slider-input w-full" 
-      min="1" 
-      max="50" 
-    />
-  </div>
+					<label for="steps-input" class="input-label">Steps: {{ steps }}</label>
+					<input type="range" v-model="steps" id="steps-input" class="slider-input w-full" min="1" max="50" />
+				</div>
 
 				<!-- Aspect Ratio Selection -->
 				<div>
@@ -68,18 +64,35 @@
 					Generate Image
 				</button>
 			</form>
-
 			<div class="col-span-2 lg:h-full flex bg-fill-secondary items-center justify-center">
 				<div id="image-output" class="image-output w-full h-full lg:h-auto">
-					<div v-if="imageUrl" class="flex items-center justify-center h-full">
+					<div v-if="imageUrl" class="flex flex-col items-center justify-center h-full">
 						<img :src="imageUrl || undefined" alt="Generated Image"
-							class="max-h-full max-w-full object-contain" />
+							class="max-h-full max-w-full object-contain mb-4" />
+						<div class="flex space-x-4">
+							<button @click="openModal" class="view-button">
+								View Full Size
+							</button>
+							<button @click="downloadImage" class="download-button">
+								Download Image
+							</button>
+						</div>
 					</div>
 					<div v-else class="text-white text-center">
 						<p>No image generated yet.</p>
 					</div>
 				</div>
 			</div>
+
+			<!-- Image Modal -->
+			<image-modal v-if="modalVisible" :isVisible="modalVisible" :imageUrl="imageUrl || ''" @close="closeModal" />
+			<!-- Existing template code -->
+
+
+
+
+
+
 		</div>
 		<div class="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full mt-8">
 			<div class="col-span-1 flex flex-col border-r border-white">
@@ -95,7 +108,7 @@
 			<div class="col-span-2 lg:h-full grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 auto-rows-fr">
 				<template v-if="oldImages.length > 0">
 					<div v-for="(image, index) in oldImages.slice(-4)" :key="index"
-						class="flex items-center justify-center">
+						class="flex items-center justify-center cursor-pointer" @click="viewImage(image)">
 						<img :src="image" alt="Old Generated Image" class="max-h-24 max-w-24 object-contain" />
 					</div>
 				</template>
@@ -108,18 +121,25 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch, onMounted } from "vue";
+import { defineComponent, ref, watch, onMounted, computed } from "vue";
 import { initializeWebSocket } from "../services/websocket";
 import { generateUUID } from "../services/utils";
 import { WebSocketResponse } from "../services/types";
+import ImageModal from "./ImageModal.vue";
+
 
 export default defineComponent({
+	components: {
+		ImageModal,
+	},
 	setup() {
+		const modalVisible = ref(false); // Declare and initialize modalVisible
+
 		const textInput = ref("");
 		const model = ref("civitai:158441@358398");
 		const steps = ref(10);
 		const preference = ref("quality"); // Default preference is "quality"
-		const aspectRatio = ref("1:1"); // Default aspect ratio
+		const aspectRatio = ref("4:3"); // Default aspect ratio
 		const width = ref(1024); // Default max width
 		const height = ref(1024); // Default max height
 		const imageUrl = ref<string | null>(null);
@@ -127,6 +147,7 @@ export default defineComponent({
 		const statusMessage = ref("");
 		const loadingAnimation = ref("");
 		const oldImages = ref<string[]>([]);
+
 
 		let ws: WebSocket;
 		let timeoutId: number | null = null;
@@ -297,8 +318,9 @@ export default defineComponent({
 		watch([aspectRatio, preference], calculateDimensions, { immediate: true });
 
 		watch(model, () => {
-			updateStatusMessage(`Model changed to "${model.value}". Reinitializing WebSocket...`);
-			reinitializeWebSocket();
+		console.log(`Model changed to: ${model.value}`);
+		reinitializeWebSocket(); // Remove the arguments
+		updateStatusMessage(`Authenticated successfully with model: ${model.value}`);
 		});
 
 		onMounted(() => {
@@ -311,6 +333,59 @@ export default defineComponent({
 				}
 			}, 60000);
 		});
+
+		
+
+		// Function to open the modal
+		const openModal = () => {
+			modalVisible.value = true;
+		};
+
+		// Function to close the modal
+		const closeModal = () => {
+			modalVisible.value = false;
+		};
+
+		const viewImage = (imageUrlToView: string) => {
+			imageUrl.value = imageUrlToView; // Set the image URL for the modal
+			openModal(); // Open the modal
+		};
+
+		const downloadFilename = computed(() => {
+			if (imageUrl.value) {
+				const imageExtension = imageUrl.value.split('.').pop();
+				return `skunkworks_${generateUUID()}.${imageExtension}`;
+			}
+			return 'skunkworks_image.jpg';
+		});
+
+		const downloadImage = async () => {
+			if (imageUrl.value) {
+				try {
+					// Fetch the image as a blob
+					const response = await fetch(imageUrl.value);
+					const blob = await response.blob();
+
+					// Create a link element
+					const link = document.createElement('a');
+					link.href = URL.createObjectURL(blob);
+					link.download = downloadFilename.value; // Use the computed filename
+
+					// Trigger the download
+					document.body.appendChild(link);
+					link.click();
+
+					// Clean up
+					document.body.removeChild(link);
+					URL.revokeObjectURL(link.href);
+				} catch (error) {
+					console.error("Download failed:", error);
+				}
+			}
+		};
+
+
+
 
 		return {
 			textInput,
@@ -326,6 +401,12 @@ export default defineComponent({
 			loadingAnimation,
 			handleSubmit,
 			oldImages,
+			downloadFilename,
+			downloadImage,
+			modalVisible,
+			openModal,
+			closeModal,
+			viewImage,
 		};
 	},
 });
