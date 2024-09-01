@@ -5,7 +5,7 @@ export interface WebSocketResponse {
         taskType: string;
         connectionSessionUUID?: string;
         imageURL?: string;
-        taskUUID?: string;  // Add this line to include taskUUID
+        taskUUID?: string;
     }>;
 }
   

@@ -30,6 +30,19 @@ npm run build
 See [Configuration Reference](https://cli.vuejs.org/config/).
 
 
+## Next Up 
+
+-  widht and hight
+-  resultion 
+-  dif. Models 
+-  download 
+-  1 result 
 
 
 
+
+
+
+
+
+## 

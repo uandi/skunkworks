@@ -1,85 +1,106 @@
 <template>
-	<div class="flex flex-col items-center justify-center min-h-screen bg-black">
-
-		<!-- Flex container for form and image output -->
-		<div class="flex flex-row items-start justify-between w-full px-8">
-			<!-- Form Section -->
-			<form @submit.prevent="handleSubmit" class="bg-gray-800 p-6 rounded-lg shadow-lg w-1/3 space-y-4 h-full">
-				<!-- Textarea for Prompt -->
+	<div class="image-generator-container px-8">
+		<div class="w-full text-start mb-8">
+			<h1 class="headline-text">skunkwork 1.0</h1>
+			<p class="text-white">WIP: //unstable //Beta</p>
+		</div>
+		<div class="w-full h-px bg-white my-4"></div>
+		<div class="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full">
+			<form @submit.prevent="handleSubmit" class="form-section col-span-1 flex flex-col border-r border-white">
 				<div>
-					<label for="text-input" class="block text-sm font-medium mb-2 text-gray-200">Enter your text:</label>
-					<textarea v-model="textInput" id="text-input" rows="4"
-						class="w-full p-2 border border-black rounded bg-black text-white focus:outline-none focus:ring focus:ring-gray-500 resize-none"
-						required></textarea>
+					<label for="text-input" class="input-label">Enter your text:</label>
+					<textarea v-model="textInput" id="text-input" rows="4" class="text-input resize-none" required
+						placeholder="Enter your prompt">
+					</textarea>
 				</div>
-
 				<!-- Model Selection -->
 				<div>
-					<label for="model-select" class="block text-sm font-medium mb-2 text-gray-200">Choose Model:</label>
-					<select v-model="model" id="model-select"
-						class="w-full p-2 border border-black rounded bg-black text-white focus:outline-none focus:ring focus:ring-gray-500">
+					<label for="model-select" class="input-label">Choose Model:</label>
+					<select v-model="model" id="model-select" class="select-input">
 						<option value="civitai:158441@358398">epiCRealism</option>
 						<option value="civitai:12597@14856">JJ's Interior Space</option>
 					</select>
 				</div>
 
-				<!-- Width Input -->
+				<!-- Preference Selection -->
 				<div>
-					<label for="dimension-width" class="block text-sm font-medium mb-2 text-gray-200">Width:</label>
-					<input type="number" v-model="width" id="dimension-width"
-						class="w-full p-2 border border-black rounded bg-black text-white focus:outline-none focus:ring focus:ring-indigo-500"
-						min="64" max="1024" />
+					<label for="preference-select" class="input-label">
+						Select Preference:
+					</label>
+					<select v-model="preference" id="preference-select" class="select-input">
+						<option value="speed">Speed</option>
+						<option value="quality">Quality</option>
+					</select>
 				</div>
 
-				<!-- Height Input -->
 				<div>
-					<label for="dimension-height" class="block text-sm font-medium mb-2 text-gray-200">Height:</label>
-					<input type="number" v-model="height" id="dimension-height"
-						class="w-full p-2 border border-black rounded bg-black text-white focus:outline-none focus:ring focus:ring-indigo-500"
-						min="64" max="1024" />
+    <label for="steps-input" class="input-label">Steps: {{ steps }}</label>
+    <input 
+      type="range" 
+      v-model="steps" 
+      id="steps-input" 
+      class="slider-input w-full" 
+      min="1" 
+      max="50" 
+    />
+  </div>
+
+				<!-- Aspect Ratio Selection -->
+				<div>
+					<label for="aspect-ratio-select" class="input-label">Select Aspect Ratio:</label>
+					<select v-model="aspectRatio" id="aspect-ratio-select" class="select-input">
+						<option value="1:1">1:1 (Square)</option>
+						<option value="16:9">16:9 (Widescreen)</option>
+						<option value="4:3">4:3 (Standard)</option>
+						<option value="3:2">3:2 (Classic)</option>
+						<option value="21:9">21:9 (Ultra-Widescreen)</option>
+						<option value="9:16">9:16 (Portrait)</option>
+						<option value="1.85:1">1.85:1 (Cinematic)</option>
+					</select>
 				</div>
 
-				<!-- Steps Input -->
+				<!-- Display Calculated Dimensions -->
 				<div>
-					<label for="steps-input" class="block text-sm font-medium mb-2 text-gray-200">Steps:</label>
-					<input type="number" v-model="steps" id="steps-input"
-						class="w-full p-2 border border-black rounded bg-black text-white focus:outline-none focus:ring focus:ring-gray-500"
-						min="1" max="50" />
+					<p class="text-sm text-gray-400">Calculated Dimensions: {{ width }} x {{ height }}</p>
 				</div>
 
-				<!-- Generate Button -->
-				<button type="submit" :disabled="loading"
-					class="w-full py-2 bg-gray-700 hover:bg-gray-600 rounded text-white font-semibold disabled:opacity-50">
+				<button type="submit" :disabled="loading" class="generate-button">
 					Generate Image
 				</button>
-
-				<!-- Preview Button -->
-				<button type="button" @click="handlePreview" :disabled="loading"
-					class="w-full py-2 bg-gray-700 hover:bg-gray-600 rounded text-white font-semibold disabled:opacity-50">
-					Preview Image
-				</button>
-
-						<!-- Loading Indicator -->
-		<div v-if="loading" id="loading-indicator" class="mt-6 text-gray-400">
-			{{ loadingAnimation }} Processing...
-		</div>
-
-		<!-- Status Message -->
-		<div v-if="statusMessage" class="mt-4 text-gray-400 text-sm">
-			<p>{{ statusMessage }}</p>
-		</div>
-
 			</form>
 
-			<!-- Image Output -->
-			<div id="image-output" class="flex items-center justify-center bg-gray-800 rounded-lg shadow-lg w-2/3 h-full">
-				<!-- Display generated image or placeholder if image is not yet generated -->
-				<div v-if="imageUrl" class="flex items-center justify-center h-full">
-					<img :src="imageUrl || undefined" alt="Generated Image"
-						class="rounded shadow-lg max-h-full max-w-full object-contain" />
+			<div class="col-span-2 lg:h-full flex bg-fill-secondary items-center justify-center">
+				<div id="image-output" class="image-output w-full h-full lg:h-auto">
+					<div v-if="imageUrl" class="flex items-center justify-center h-full">
+						<img :src="imageUrl || undefined" alt="Generated Image"
+							class="max-h-full max-w-full object-contain" />
+					</div>
+					<div v-else class="text-white text-center">
+						<p>No image generated yet.</p>
+					</div>
 				</div>
-				<div v-else class="text-gray-500 text-center">
-					<p>No image generated yet.</p>
+			</div>
+		</div>
+		<div class="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full mt-8">
+			<div class="col-span-1 flex flex-col border-r border-white">
+				<div class="terminal-container">
+					<div v-if="statusMessage" class="status-message">
+						Status: <span>{{ statusMessage }}</span><span class="terminal-cursor"></span>
+					</div>
+					<div v-if="loading" id="loading-indicator" class="loading-indicator">
+						Processing Data {{ loadingAnimation }}
+					</div>
+				</div>
+			</div>
+			<div class="col-span-2 lg:h-full grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 auto-rows-fr">
+				<template v-if="oldImages.length > 0">
+					<div v-for="(image, index) in oldImages.slice(-4)" :key="index"
+						class="flex items-center justify-center">
+						<img :src="image" alt="Old Generated Image" class="max-h-24 max-w-24 object-contain" />
+					</div>
+				</template>
+				<div v-else class="flex items-center justify-center col-span-4">
+					<p class="text-white">No old images available.</p>
 				</div>
 			</div>
 		</div>
@@ -87,50 +108,32 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted } from 'vue';
-import { initializeWebSocket } from '../services/websocket';
-import { generateUUID } from '../services/utils';
-import { WebSocketResponse } from '../services/types';
+import { defineComponent, ref, watch, onMounted } from "vue";
+import { initializeWebSocket } from "../services/websocket";
+import { generateUUID } from "../services/utils";
+import { WebSocketResponse } from "../services/types";
 
 export default defineComponent({
 	setup() {
-		const textInput = ref('');
-		const model = ref('civitai:158441@358398');
+		const textInput = ref("");
+		const model = ref("civitai:158441@358398");
 		const steps = ref(10);
-		const width = ref(512);
-		const height = ref(512);
+		const preference = ref("quality"); // Default preference is "quality"
+		const aspectRatio = ref("1:1"); // Default aspect ratio
+		const width = ref(1024); // Default max width
+		const height = ref(1024); // Default max height
 		const imageUrl = ref<string | null>(null);
 		const loading = ref(false);
-		const statusMessage = ref('');
-		const loadingAnimation = ref(''); // This will hold the current frame of the animation
+		const statusMessage = ref("");
+		const loadingAnimation = ref("");
+		const oldImages = ref<string[]>([]);
+
 		let ws: WebSocket;
 		let timeoutId: number | null = null;
 		let animationInterval: number | null = null;
 
-		// Variables to store the UUIDs for preview and full image requests
-		let fullImageRequestUUID: string | null = null;
-		let previewRequestUUID: string | null = null;
-
 		const updateStatusMessage = (message: string) => {
 			statusMessage.value = message;
-		};
-
-		const startLoadingAnimation = () => {
-			const frames = ['.  ', '.. ', '...', ' ..', '  .', '   ']; // Dots Spinner
-			let frameIndex = 0;
-
-			animationInterval = window.setInterval(() => {
-				loadingAnimation.value = frames[frameIndex];
-				frameIndex = (frameIndex + 1) % frames.length;
-			}, 200); // Change frame every 200ms
-		};
-
-		const stopLoadingAnimation = () => {
-			if (animationInterval !== null) {
-				clearInterval(animationInterval);
-				animationInterval = null;
-				loadingAnimation.value = ''; // Clear the animation
-			}
 		};
 
 		const resetLoadingState = () => {
@@ -142,23 +145,91 @@ export default defineComponent({
 			}
 		};
 
+		const calculateDimensions = () => {
+			const maxDimension = preference.value === "speed" ? 512 : 1024;
+			let aspectWidth, aspectHeight;
+
+			switch (aspectRatio.value) {
+				case "16:9":
+					aspectWidth = 16;
+					aspectHeight = 9;
+					break;
+				case "4:3":
+					aspectWidth = 4;
+					aspectHeight = 3;
+					break;
+				case "3:2":
+					aspectWidth = 3;
+					aspectHeight = 2;
+					break;
+				case "21:9":
+					aspectWidth = 21;
+					aspectHeight = 9;
+					break;
+				case "9:16":
+					aspectWidth = 9;
+					aspectHeight = 16;
+					break;
+				case "1.85:1":
+					aspectWidth = 1.85;
+					aspectHeight = 1;
+					break;
+				case "1:1":
+				default:
+					aspectWidth = 1;
+					aspectHeight = 1;
+					break;
+			}
+
+			const maxAspectRatio = Math.max(aspectWidth, aspectHeight);
+			if (maxAspectRatio === aspectWidth) {
+				width.value = maxDimension;
+				height.value = Math.round((maxDimension * aspectHeight) / aspectWidth);
+			} else {
+				height.value = maxDimension;
+				width.value = Math.round((maxDimension * aspectWidth) / aspectHeight);
+			}
+		};
+
+		const startLoadingAnimation = () => {
+			const frames = [".  ", ".. ", "...", " ..", "  .", "   "];
+			let frameIndex = 0;
+
+			animationInterval = window.setInterval(() => {
+				loadingAnimation.value = frames[frameIndex];
+				frameIndex = (frameIndex + 1) % frames.length;
+			}, 200);
+		};
+
+		const stopLoadingAnimation = () => {
+			if (animationInterval !== null) {
+				clearInterval(animationInterval);
+				animationInterval = null;
+				loadingAnimation.value = "";
+			}
+		};
+
 		const handleSubmit = () => {
 			if (loading.value) {
-				updateStatusMessage('Please wait for the current request to complete.');
+				statusMessage.value = "Please wait for the current request to complete.";
+				return;
+			}
+
+			if (!ws || ws.readyState !== WebSocket.OPEN) {
+				statusMessage.value = "WebSocket connection is not ready. Please wait.";
 				return;
 			}
 
 			loading.value = true;
 			imageUrl.value = null;
 
-			// Generate and store the UUID for the full image request
-			fullImageRequestUUID = generateUUID();
+			const imageRequestUUID = generateUUID();
 
 			const imageRequest = {
-				taskType: 'imageInference',
-				taskUUID: fullImageRequestUUID,
-				outputType: 'URL',
-				outputFormat: 'JPG',
+				taskType: "imageInference",
+				taskUUID: imageRequestUUID,
+				outputType: "URL",
+				outputFormat: "JPG",
 				positivePrompt: textInput.value,
 				height: height.value,
 				width: width.value,
@@ -168,89 +239,75 @@ export default defineComponent({
 				numberResults: 1,
 			};
 
-			updateStatusMessage('Sending image generation request...');
+			// Set initial detailed status message
+			statusMessage.value = `Sending image generation request:
+    - Model: ${model.value}
+    - Width: ${width.value}px
+    - Height: ${height.value}px
+    - Steps: ${steps.value}
+    - Preference: ${preference.value}
+    - Aspect Ratio: ${aspectRatio.value}`;
+
 			ws.send(JSON.stringify([imageRequest]));
 
-			updateStatusMessage('Image request successfully sent. Processing...');
-			startLoadingAnimation(); // Start the loading animation
+			// Append the success message
+			statusMessage.value += "\nImage request successfully sent.";
 
-			// Set a timeout to handle unresponsive requests
+			startLoadingAnimation();
+
 			timeoutId = window.setTimeout(() => {
-				updateStatusMessage('Request timed out. Please try again.');
+				statusMessage.value += "\nRequest timed out. Please try again.";
 				resetLoadingState();
-			}, 30000); // 30 seconds timeout
-		};
-
-		const handlePreview = () => {
-			if (loading.value) {
-				updateStatusMessage('Please wait for the current request to complete.');
-				return;
-			}
-
-			loading.value = true;
-			imageUrl.value = null;
-
-			// Generate and store the UUID for the preview request
-			previewRequestUUID = generateUUID();
-
-			const previewRequest = {
-				taskType: 'imageInference',
-				taskUUID: previewRequestUUID,
-				outputType: 'URL',
-				outputFormat: 'JPG',
-				positivePrompt: textInput.value,
-				height: height.value,
-				width: width.value,
-				model: model.value,
-				steps: 5, // Use fewer steps for a faster preview generation
-				CFGScale: 8.0,
-				numberResults: 1,
-			};
-
-			updateStatusMessage('Sending preview request...');
-			ws.send(JSON.stringify([previewRequest]));
-
-			updateStatusMessage('Preview request successfully sent. Processing...');
-			startLoadingAnimation(); // Start the loading animation
-
-			// Set a timeout to handle unresponsive requests
-			timeoutId = window.setTimeout(() => {
-				updateStatusMessage('Preview request timed out. Please try again.');
-				resetLoadingState();
-			}, 15000); // 15 seconds timeout for preview
+			}, 30000); // Increased timeout duration for stability
 		};
 
 		const handleImageResponse = (response: WebSocketResponse) => {
-			if (response.data && response.data[0].taskType === 'imageInference') {
+			if (response.data && response.data[0].taskType === "imageInference") {
 				const imageUrlFromResponse = response.data[0].imageURL;
 
 				if (imageUrlFromResponse) {
-					// Check if the response matches the UUID of the preview or full image request
-					if (response.data[0].taskUUID === fullImageRequestUUID) {
-						updateStatusMessage('Image generated successfully!');
-					} else if (response.data[0].taskUUID === previewRequestUUID) {
-						updateStatusMessage('Preview generated successfully!');
-					}
+					statusMessage.value += "\nImage generated successfully!";
 					imageUrl.value = imageUrlFromResponse;
+
+					// Add the new image to the list of old images
+					oldImages.value.push(imageUrlFromResponse);
+
 					resetLoadingState();
 				} else {
-					updateStatusMessage('Failed to generate image. Please try again.');
+					statusMessage.value += "\nFailed to generate image. Please try again.";
 					resetLoadingState();
 				}
 			}
 		};
 
-		onMounted(() => {
-			ws = initializeWebSocket(handleImageResponse, () => {
-				updateStatusMessage('Authenticated successfully.');
-			});
+		const reinitializeWebSocket = () => {
+			console.log("Reinitializing WebSocket due to model change...");
+			// Close the existing WebSocket connection if it exists
+			if (ws && ws.readyState === WebSocket.OPEN) {
+				ws.close();
+			}
+			// Re-initialize the WebSocket connection after a short delay
+			setTimeout(() => {
+				ws = initializeWebSocket(handleImageResponse, () => {
+					updateStatusMessage(`Authenticated successfully with model: ${model.value}`);
+				});
+			}, 500); // Short delay to ensure the previous connection is properly closed
+		};
 
-			// Ping every 60 seconds to keep WebSocket connection alive
+		watch([aspectRatio, preference], calculateDimensions, { immediate: true });
+
+		watch(model, () => {
+			updateStatusMessage(`Model changed to "${model.value}". Reinitializing WebSocket...`);
+			reinitializeWebSocket();
+		});
+
+		onMounted(() => {
+			reinitializeWebSocket(); // Initialize WebSocket on mount
 			setInterval(() => {
-				if (ws.readyState === WebSocket.OPEN) {
-					const pingMessage = { taskType: 'ping', ping: true };
+				if (ws && ws.readyState === WebSocket.OPEN) {
+					const pingMessage = { taskType: "ping", ping: true };
 					ws.send(JSON.stringify([pingMessage]));
-					updateStatusMessage('Ping message sent to keep connection alive.');
+					updateStatusMessage("Ping message sent to keep connection alive.");
 				}
 			}, 60000);
 		});
@@ -259,6 +316,8 @@ export default defineComponent({
 			textInput,
 			model,
 			steps,
+			preference,
+			aspectRatio,
 			width,
 			height,
 			imageUrl,
@@ -266,7 +325,7 @@ export default defineComponent({
 			statusMessage,
 			loadingAnimation,
 			handleSubmit,
-			handlePreview,
+			oldImages,
 		};
 	},
 });
