@@ -6,6 +6,7 @@ export interface WebSocketResponse {
         connectionSessionUUID?: string;
         imageURL?: string;
         taskUUID?: string;
+		imageUUID?: string;
     }>;
 }
   

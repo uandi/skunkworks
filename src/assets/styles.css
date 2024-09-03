@@ -35,7 +35,7 @@
 
 /* Apply JetBrains Mono globally */
 body {
-    @apply font-code text-white;
+    @apply font-code text-white text-sm;
 }
 
 /* Tailwind and other styles */
@@ -65,10 +65,7 @@ body {
     @apply w-full p-2 border bg-black text-white border-white focus:outline-none focus:ring focus:ring-fill-gray-tertiary rounded;
 }
 
-.generate-button,
-.preview-button {
-    @apply w-full py-2 bg-fill-gray-quaternary hover:bg-fill-gray-tertiary text-white font-semibold disabled:opacity-50;
-}
+
 
 .image-output {
     @apply flex items-center justify-center h-full;
@@ -76,16 +73,13 @@ body {
 
 /* Terminal-like status message styling */
 .terminal-container {
-    @apply text-green;
+    @apply text-green text-xs;
 }
 
 .status-message {
-    @apply mt-4 text-sm whitespace-pre-line;
+    @apply mt-4 text-xs whitespace-pre-line;
 }
 
-.loading-indicator {
-    @apply italic;
-}
 
 /* Optional cursor blink effect */
 .terminal-cursor {
@@ -149,18 +143,26 @@ body {
 }
 
 .close-button,
+.generate-button,
+.view-button,
 .download-button,
-.view-button {
-    @apply mt-4 bg-gray-800 text-white px-4 py-2 cursor-pointer;
+.preview-button {
+    @apply border border-white text-white px-4 py-2 cursor-pointer;
 }
 
-.close-button:hover,
+.close-button, 
+.generate-button:hover,
+.view-button:hover,
 .download-button:hover,
-.view-button:hover {
-    @apply bg-gray-600;
+.preview-button:hover {
 }
 
 
 .modal-image {
     @apply max-w-full max-h-screen object-contain;
 }
+
+.file-input {
+    @apply w-full p-2 border bg-black text-white border-white focus:outline-none focus:ring focus:ring-fill-gray-tertiary rounded;
+}
+

@@ -13,14 +13,24 @@
 						placeholder="Enter your prompt">
 					</textarea>
 				</div>
+				<div>
+					<label for="image-upload" class="input-label">Upload Reference Image:</label>
+					<input type="file" id="image-upload" @change="handleImageUpload"
+						accept="image/jpeg,image/png,image/webp,image/bmp,image/gif" class="file-input" />
+				</div>
+				<div class="flex items-baseline space-x-2">
+					<input type="checkbox" id="use-reference-image" v-model="useReferenceImage"
+						class="form-checkbox h-3 w-3 text-green" />
+					<label for="use-reference-image" class="input-label">
+						Use Reference Image
+					</label>
+				</div>
 				<!-- Model Selection -->
 				<div>
 					<label for="model-select" class="input-label">Choose Model:</label>
 					<select v-model="model" id="model-select" class="select-input">
 						<option value="civitai:158441@358398">epiCRealism</option>
-						<option value="civitai:12597@14856">JJ's Interior Space</option>
 						<option value="civitai:158441@358398">SocaRealism XL</option>
-						<option value="civitai:12597@14856">墨心 MoXin</option>
 						<option value="civitai:133005@471120">Juggernaut XL</option>
 					</select>
 				</div>
@@ -60,6 +70,7 @@
 					<p class="text-sm text-gray-400">Calculated Dimensions: {{ width }} x {{ height }}</p>
 				</div>
 
+
 				<button type="submit" :disabled="loading" class="generate-button">
 					Generate Image
 				</button>
@@ -68,14 +79,21 @@
 				<div id="image-output" class="image-output w-full h-full lg:h-auto">
 					<div v-if="imageUrl" class="flex flex-col items-center justify-center h-full">
 						<img :src="imageUrl || undefined" alt="Generated Image"
-							class="max-h-full max-w-full object-contain mb-4" />
-						<div class="flex space-x-4">
-							<button @click="openModal" class="view-button">
-								View Full Size
-							</button>
-							<button @click="downloadImage" class="download-button">
-								Download Image
-							</button>
+							class="max-h-full max-w-full object-contain p-4" />
+						<div class="flex flex-col space-y-2 mb-4">
+							<div class="flex space-x-4">
+								<button @click="openModal" class="view-button">
+									View Full Size
+								</button>
+								<button @click="downloadImage" class="download-button">
+									Download Image
+								</button>
+							</div>
+							<!-- Display success message here -->
+							<span v-if="statusMessage.includes('Image generated successfully!')"
+								class="text-sm text-green-400">
+								{{ statusMessage }}
+							</span>
 						</div>
 					</div>
 					<div v-else class="text-white text-center">
@@ -83,16 +101,9 @@
 					</div>
 				</div>
 			</div>
-
 			<!-- Image Modal -->
 			<image-modal v-if="modalVisible" :isVisible="modalVisible" :imageUrl="imageUrl || ''" @close="closeModal" />
 			<!-- Existing template code -->
-
-
-
-
-
-
 		</div>
 		<div class="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full mt-8">
 			<div class="col-span-1 flex flex-col border-r border-white">
@@ -109,12 +120,18 @@
 				<template v-if="oldImages.length > 0">
 					<div v-for="(image, index) in oldImages.slice(-4)" :key="index"
 						class="flex items-center justify-center cursor-pointer" @click="viewImage(image)">
-						<img :src="image" alt="Old Generated Image" class="max-h-24 max-w-24 object-contain" />
+						<img :src="image" alt="Old Generated Image" class="max-h-32 max-w-32 object-contain" />
 					</div>
 				</template>
-				<div v-else class="flex items-center justify-center col-span-4">
-					<p class="text-white">No old images available.</p>
-				</div>
+				<template v-else>
+					<!-- Placeholder for when there are no images -->
+					<div v-for="index in 4" :key="index" class="flex items-center justify-center cursor-pointer">
+						<div
+							class="w-32 h-32 bg-gray-800 border border-gray-600 flex items-center justify-center text-gray-500">
+							<p>Placeholder</p>
+						</div>
+					</div>
+				</template>
 			</div>
 		</div>
 	</div>
@@ -127,27 +144,27 @@ import { generateUUID } from "../services/utils";
 import { WebSocketResponse } from "../services/types";
 import ImageModal from "./ImageModal.vue";
 
-
 export default defineComponent({
 	components: {
 		ImageModal,
 	},
 	setup() {
-		const modalVisible = ref(false); // Declare and initialize modalVisible
-
+		const modalVisible = ref(false);
 		const textInput = ref("");
 		const model = ref("civitai:158441@358398");
 		const steps = ref(10);
-		const preference = ref("quality"); // Default preference is "quality"
-		const aspectRatio = ref("4:3"); // Default aspect ratio
-		const width = ref(1024); // Default max width
-		const height = ref(1024); // Default max height
+		const preference = ref("quality");
+		const aspectRatio = ref("4:3");
+		const width = ref(1024);
+		const height = ref(1024);
 		const imageUrl = ref<string | null>(null);
 		const loading = ref(false);
 		const statusMessage = ref("");
 		const loadingAnimation = ref("");
 		const oldImages = ref<string[]>([]);
-
+		const uploadedImage = ref<string | null>(null);
+		const imageUUID = ref<string | null>(null);
+		const useReferenceImage = ref(false);
 
 		let ws: WebSocket;
 		let timeoutId: number | null = null;
@@ -230,6 +247,41 @@ export default defineComponent({
 			}
 		};
 
+		const handleImageUpload = async (event: Event) => {
+			const file = (event.target as HTMLInputElement).files?.[0];
+			if (!file) return;
+
+			const reader = new FileReader();
+			reader.onload = async () => {
+				uploadedImage.value = reader.result as string;
+
+				const imageUploadUUID = generateUUID();
+				const uploadRequest = {
+					taskType: "imageUpload",
+					taskUUID: imageUploadUUID,
+					image: uploadedImage.value,
+				};
+
+				ws.send(JSON.stringify([uploadRequest]));
+
+				ws.onmessage = (event: MessageEvent) => {
+					const response: WebSocketResponse = JSON.parse(event.data);
+					const imageUploadResponse = response.data[0];
+
+					if (imageUploadResponse.taskType === "imageUpload") {
+						if (imageUploadResponse.imageUUID) {
+							imageUUID.value = imageUploadResponse.imageUUID;
+							statusMessage.value = "Image uploaded successfully!";
+						} else {
+							statusMessage.value = "Image upload failed: no imageUUID returned.";
+						}
+					}
+				};
+			};
+
+			reader.readAsDataURL(file);
+		};
+
 		const handleSubmit = () => {
 			if (loading.value) {
 				statusMessage.value = "Please wait for the current request to complete.";
@@ -246,7 +298,7 @@ export default defineComponent({
 
 			const imageRequestUUID = generateUUID();
 
-			const imageRequest = {
+			const imageRequest: any = {
 				taskType: "imageInference",
 				taskUUID: imageRequestUUID,
 				outputType: "URL",
@@ -260,8 +312,15 @@ export default defineComponent({
 				numberResults: 1,
 			};
 
-			// Set initial detailed status message
-			statusMessage.value = `Sending image generation request:
+			if (useReferenceImage.value && imageUUID.value) {
+				imageRequest.seedImage = imageUUID.value; // Add seedImage for image-to-image
+				imageRequest.strength = 0.8; // Control the influence of the seed image
+			}
+
+			ws.send(JSON.stringify([imageRequest]));
+
+			statusMessage.value = `Sending image generation request with${useReferenceImage.value && imageUUID.value ? " reference image" : ""
+				}:
     - Model: ${model.value}
     - Width: ${width.value}px
     - Height: ${height.value}px
@@ -269,17 +328,12 @@ export default defineComponent({
     - Preference: ${preference.value}
     - Aspect Ratio: ${aspectRatio.value}`;
 
-			ws.send(JSON.stringify([imageRequest]));
-
-			// Append the success message
-			statusMessage.value += "\nImage request successfully sent.";
-
 			startLoadingAnimation();
 
 			timeoutId = window.setTimeout(() => {
 				statusMessage.value += "\nRequest timed out. Please try again.";
 				resetLoadingState();
-			}, 30000); // Increased timeout duration for stability
+			}, 30000);
 		};
 
 		const handleImageResponse = (response: WebSocketResponse) => {
@@ -290,7 +344,6 @@ export default defineComponent({
 					statusMessage.value += "\nImage generated successfully!";
 					imageUrl.value = imageUrlFromResponse;
 
-					// Add the new image to the list of old images
 					oldImages.value.push(imageUrlFromResponse);
 
 					resetLoadingState();
@@ -303,28 +356,26 @@ export default defineComponent({
 
 		const reinitializeWebSocket = () => {
 			console.log("Reinitializing WebSocket due to model change...");
-			// Close the existing WebSocket connection if it exists
 			if (ws && ws.readyState === WebSocket.OPEN) {
 				ws.close();
 			}
-			// Re-initialize the WebSocket connection after a short delay
 			setTimeout(() => {
 				ws = initializeWebSocket(handleImageResponse, () => {
 					updateStatusMessage(`Authenticated successfully with model: ${model.value}`);
 				});
-			}, 500); // Short delay to ensure the previous connection is properly closed
+			}, 500);
 		};
 
 		watch([aspectRatio, preference], calculateDimensions, { immediate: true });
 
 		watch(model, () => {
-		console.log(`Model changed to: ${model.value}`);
-		reinitializeWebSocket(); // Remove the arguments
-		updateStatusMessage(`Authenticated successfully with model: ${model.value}`);
+			console.log(`Model changed to: ${model.value}`);
+			reinitializeWebSocket();
+			updateStatusMessage(`Authenticated successfully with model: ${model.value}`);
 		});
 
 		onMounted(() => {
-			reinitializeWebSocket(); // Initialize WebSocket on mount
+			reinitializeWebSocket();
 			setInterval(() => {
 				if (ws && ws.readyState === WebSocket.OPEN) {
 					const pingMessage = { taskType: "ping", ping: true };
@@ -334,48 +385,40 @@ export default defineComponent({
 			}, 60000);
 		});
 
-		
-
-		// Function to open the modal
 		const openModal = () => {
 			modalVisible.value = true;
 		};
 
-		// Function to close the modal
 		const closeModal = () => {
 			modalVisible.value = false;
 		};
 
 		const viewImage = (imageUrlToView: string) => {
-			imageUrl.value = imageUrlToView; // Set the image URL for the modal
-			openModal(); // Open the modal
+			imageUrl.value = imageUrlToView;
+			openModal();
 		};
 
 		const downloadFilename = computed(() => {
 			if (imageUrl.value) {
-				const imageExtension = imageUrl.value.split('.').pop();
+				const imageExtension = imageUrl.value.split(".").pop();
 				return `skunkworks_${generateUUID()}.${imageExtension}`;
 			}
-			return 'skunkworks_image.jpg';
+			return "skunkworks_image.jpg";
 		});
 
 		const downloadImage = async () => {
 			if (imageUrl.value) {
 				try {
-					// Fetch the image as a blob
 					const response = await fetch(imageUrl.value);
 					const blob = await response.blob();
 
-					// Create a link element
-					const link = document.createElement('a');
+					const link = document.createElement("a");
 					link.href = URL.createObjectURL(blob);
-					link.download = downloadFilename.value; // Use the computed filename
+					link.download = downloadFilename.value;
 
-					// Trigger the download
 					document.body.appendChild(link);
 					link.click();
 
-					// Clean up
 					document.body.removeChild(link);
 					URL.revokeObjectURL(link.href);
 				} catch (error) {
@@ -383,9 +426,6 @@ export default defineComponent({
 				}
 			}
 		};
-
-
-
 
 		return {
 			textInput,
@@ -407,6 +447,10 @@ export default defineComponent({
 			openModal,
 			closeModal,
 			viewImage,
+			handleImageUpload,
+			uploadedImage,
+			imageUUID,
+			useReferenceImage,
 		};
 	},
 });
