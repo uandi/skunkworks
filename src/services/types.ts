@@ -6,30 +6,33 @@ export interface WebSocketResponse {
         connectionSessionUUID?: string;
         imageURL?: string;
         taskUUID?: string;
-		imageUUID?: string;
+        imageUUID?: string;
+        errorMessage?: string; 
     }>;
 }
-  
-  export interface AuthMessage {
-	taskType: string;
-	apiKey: string;
-  }
-  
-  export interface ImageRequest {
-	taskType: string;
-	taskUUID: string;
-	outputType: string;
-	outputFormat: string;
-	positivePrompt: string;
-	height: number;
-	width: number;
-	model: string;
-	steps: number;
-	CFGScale: number;
-	numberResults: number;
-  }
-  
-  export interface PingMessage {
-	taskType: string;
-	ping: boolean;
-  }
+
+export interface AuthMessage {
+    taskType: string;
+    apiKey: string;
+}
+
+export interface ImageRequest {
+    taskType: string;
+    taskUUID: string;
+    outputType: string;
+    outputFormat: string;
+    positivePrompt: string;
+    height: number;
+    width: number;
+    model: string;
+    steps: number;
+    CFGScale: number;
+    numberResults: number;
+    seedImage?: string;  
+    strength?: number;   
+}
+
+export interface PingMessage {
+    taskType: string;
+    ping: boolean;
+}

@@ -25,7 +25,11 @@
 						Use Reference Image
 					</label>
 				</div>
-				<!-- Model Selection -->
+				<div v-if="useReferenceImage && uploadedImage" class="mb-4">
+					<p class="input-label">Reference Image:</p>
+					<img :src="uploadedImage" alt="Reference Image"
+						class="max-w-full max-h-64 object-contain border p-2" />
+				</div>
 				<div>
 					<label for="model-select" class="input-label">Choose Model:</label>
 					<select v-model="model" id="model-select" class="select-input">
@@ -35,7 +39,6 @@
 					</select>
 				</div>
 
-				<!-- Preference Selection -->
 				<div>
 					<label for="preference-select" class="input-label">
 						Select Preference:
@@ -51,7 +54,6 @@
 					<input type="range" v-model="steps" id="steps-input" class="slider-input w-full" min="1" max="50" />
 				</div>
 
-				<!-- Aspect Ratio Selection -->
 				<div>
 					<label for="aspect-ratio-select" class="input-label">Select Aspect Ratio:</label>
 					<select v-model="aspectRatio" id="aspect-ratio-select" class="select-input">
@@ -65,7 +67,6 @@
 					</select>
 				</div>
 
-				<!-- Display Calculated Dimensions -->
 				<div>
 					<p class="text-sm text-gray-400">Calculated Dimensions: {{ width }} x {{ height }}</p>
 				</div>
@@ -77,25 +78,21 @@
 			</form>
 			<div class="col-span-2 lg:h-full flex bg-fill-secondary items-center justify-center">
 				<div id="image-output" class="image-output w-full h-full lg:h-auto">
+					<!-- Display the image when imageUrl is set -->
 					<div v-if="imageUrl" class="flex flex-col items-center justify-center h-full">
-						<img :src="imageUrl || undefined" alt="Generated Image"
-							class="max-h-full max-w-full object-contain p-4" />
+						<!-- Image element using the reactive imageUrl -->
+						<img :src="imageUrl" alt="Generated Image" class="max-h-full max-w-full object-contain p-4" />
+
+						<!-- Buttons for viewing and downloading the image -->
 						<div class="flex flex-col space-y-2 mb-4">
 							<div class="flex space-x-4">
-								<button @click="openModal" class="view-button">
-									View Full Size
-								</button>
-								<button @click="downloadImage" class="download-button">
-									Download Image
-								</button>
+								<button @click="openModal" class="view-button">View Full Size</button>
+								<button @click="downloadImage" class="download-button">Download Image</button>
 							</div>
-							<!-- Display success message here -->
-							<span v-if="statusMessage.includes('Image generated successfully!')"
-								class="text-sm text-green-400">
-								{{ statusMessage }}
-							</span>
 						</div>
 					</div>
+
+					<!-- Placeholder text if no image has been generated yet -->
 					<div v-else class="text-white text-center">
 						<p>No image generated yet.</p>
 					</div>
@@ -175,8 +172,8 @@ export default defineComponent({
 		};
 
 		const resetLoadingState = () => {
-			loading.value = false;
-			stopLoadingAnimation();
+			loading.value = false;  // Stop the loading state
+			stopLoadingAnimation();  // Stop any animations
 			if (timeoutId !== null) {
 				clearTimeout(timeoutId);
 				timeoutId = null;
@@ -265,21 +262,47 @@ export default defineComponent({
 				ws.send(JSON.stringify([uploadRequest]));
 
 				ws.onmessage = (event: MessageEvent) => {
-					const response: WebSocketResponse = JSON.parse(event.data);
-					const imageUploadResponse = response.data[0];
+    try {
+        console.log("Raw WebSocket message:", event.data); // Log the raw message for debugging
 
-					if (imageUploadResponse.taskType === "imageUpload") {
-						if (imageUploadResponse.imageUUID) {
-							imageUUID.value = imageUploadResponse.imageUUID;
-							statusMessage.value = "Image uploaded successfully!";
-						} else {
-							statusMessage.value = "Image upload failed: no imageUUID returned.";
-						}
-					}
-				};
+        // Attempt to parse the message as JSON
+        const response: WebSocketResponse = JSON.parse(event.data);
+
+        const responseData = response.data[0];
+
+        // Handle image upload response
+        if (responseData.taskType === "imageUpload") {
+            if (responseData.imageUUID) {
+                imageUUID.value = responseData.imageUUID; // Save the uploaded image UUID
+                console.log("Image uploaded successfully with UUID:", imageUUID.value);
+                statusMessage.value = "Image uploaded successfully!";
+            } else {
+                statusMessage.value = "Image upload failed.";
+            }
+        }
+
+        // Handle image inference response (generation after upload)
+        if (responseData.taskType === "imageInference") {
+            const generatedImageUrl = responseData.imageURL;
+            if (generatedImageUrl) {
+                imageUrl.value = generatedImageUrl;  // Update the image URL for display
+                console.log("Image URL set to:", imageUrl.value);
+                statusMessage.value = "Image generated successfully!";
+                resetLoadingState();
+            } else {
+                statusMessage.value = "Failed to generate image. Please try again.";
+                resetLoadingState();
+            }
+        }
+
+    } catch (error) {
+        console.error("Error parsing WebSocket message:", error);
+        console.log("Raw message that caused the error:", event.data); // Log the raw message that caused the error
+    }
+};
 			};
 
-			reader.readAsDataURL(file);
+			reader.readAsDataURL(file);  // Convert the image to base64 for upload
 		};
 
 		const handleSubmit = () => {
@@ -298,12 +321,13 @@ export default defineComponent({
 
 			const imageRequestUUID = generateUUID();
 
+			// Base request for text-to-image
 			const imageRequest: any = {
 				taskType: "imageInference",
 				taskUUID: imageRequestUUID,
 				outputType: "URL",
 				outputFormat: "JPG",
-				positivePrompt: textInput.value,
+				positivePrompt: textInput.value,  // Text-based prompt
 				height: height.value,
 				width: width.value,
 				model: model.value,
@@ -312,14 +336,17 @@ export default defineComponent({
 				numberResults: 1,
 			};
 
+			// If the user has uploaded a reference image and checked the box, do img2img
 			if (useReferenceImage.value && imageUUID.value) {
-				imageRequest.seedImage = imageUUID.value; // Add seedImage for image-to-image
-				imageRequest.strength = 0.8; // Control the influence of the seed image
+				imageRequest.seedImage = imageUUID.value;  // Use the uploaded image's UUID
+				imageRequest.strength = 0.8;  // Control how much the reference image influences the generation
 			}
 
+			// Send the request to WebSocket
 			ws.send(JSON.stringify([imageRequest]));
 
-			statusMessage.value = `Sending image generation request with${useReferenceImage.value && imageUUID.value ? " reference image" : ""
+			// Update status message
+			statusMessage.value = `Sending image generation request ${useReferenceImage.value && imageUUID.value ? "with reference image" : ""
 				}:
     - Model: ${model.value}
     - Width: ${width.value}px
@@ -330,25 +357,26 @@ export default defineComponent({
 
 			startLoadingAnimation();
 
+			// Timeout for handling the request failure
 			timeoutId = window.setTimeout(() => {
 				statusMessage.value += "\nRequest timed out. Please try again.";
 				resetLoadingState();
-			}, 30000);
+			}, 30000); // 30 seconds timeout
 		};
 
 		const handleImageResponse = (response: WebSocketResponse) => {
-			if (response.data && response.data[0].taskType === "imageInference") {
-				const imageUrlFromResponse = response.data[0].imageURL;
+			console.log("WebSocket Response:", response);  // Log full response
 
-				if (imageUrlFromResponse) {
-					statusMessage.value += "\nImage generated successfully!";
-					imageUrl.value = imageUrlFromResponse;
-
-					oldImages.value.push(imageUrlFromResponse);
-
+			const responseData = response.data[0];
+			if (responseData.taskType === "imageInference") {
+				const generatedImageUrl = responseData.imageURL;
+				if (generatedImageUrl) {
+					imageUrl.value = generatedImageUrl;  // This should update the image URL
+					console.log("Image URL set to:", imageUrl.value);  // Debugging log
+					statusMessage.value = "Image generated successfully!";
 					resetLoadingState();
 				} else {
-					statusMessage.value += "\nFailed to generate image. Please try again.";
+					statusMessage.value = "Failed to generate image. Please try again.";
 					resetLoadingState();
 				}
 			}
@@ -384,6 +412,7 @@ export default defineComponent({
 				}
 			}, 60000);
 		});
+
 
 		const openModal = () => {
 			modalVisible.value = true;
@@ -451,6 +480,7 @@ export default defineComponent({
 			uploadedImage,
 			imageUUID,
 			useReferenceImage,
+			handleImageResponse,
 		};
 	},
 });
