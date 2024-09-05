@@ -262,44 +262,44 @@ export default defineComponent({
 				ws.send(JSON.stringify([uploadRequest]));
 
 				ws.onmessage = (event: MessageEvent) => {
-    try {
-        console.log("Raw WebSocket message:", event.data); // Log the raw message for debugging
+					try {
+						console.log("Raw WebSocket message:", event.data); // Log the raw message for debugging
 
-        // Attempt to parse the message as JSON
-        const response: WebSocketResponse = JSON.parse(event.data);
+						// Attempt to parse the message as JSON
+						const response: WebSocketResponse = JSON.parse(event.data);
 
-        const responseData = response.data[0];
+						const responseData = response.data[0];
 
-        // Handle image upload response
-        if (responseData.taskType === "imageUpload") {
-            if (responseData.imageUUID) {
-                imageUUID.value = responseData.imageUUID; // Save the uploaded image UUID
-                console.log("Image uploaded successfully with UUID:", imageUUID.value);
-                statusMessage.value = "Image uploaded successfully!";
-            } else {
-                statusMessage.value = "Image upload failed.";
-            }
-        }
+						// Handle image upload response
+						if (responseData.taskType === "imageUpload") {
+							if (responseData.imageUUID) {
+								imageUUID.value = responseData.imageUUID; // Save the uploaded image UUID
+								console.log("Image uploaded successfully with UUID:", imageUUID.value);
+								statusMessage.value = "Image uploaded successfully!";
+							} else {
+								statusMessage.value = "Image upload failed.";
+							}
+						}
 
-        // Handle image inference response (generation after upload)
-        if (responseData.taskType === "imageInference") {
-            const generatedImageUrl = responseData.imageURL;
-            if (generatedImageUrl) {
-                imageUrl.value = generatedImageUrl;  // Update the image URL for display
-                console.log("Image URL set to:", imageUrl.value);
-                statusMessage.value = "Image generated successfully!";
-                resetLoadingState();
-            } else {
-                statusMessage.value = "Failed to generate image. Please try again.";
-                resetLoadingState();
-            }
-        }
+						// Handle image inference response (generation after upload)
+						if (responseData.taskType === "imageInference") {
+							const generatedImageUrl = responseData.imageURL;
+							if (generatedImageUrl) {
+								imageUrl.value = generatedImageUrl;  // Update the image URL for display
+								console.log("Image URL set to:", imageUrl.value);
+								statusMessage.value = "Image generated successfully!";
+								resetLoadingState();
+							} else {
+								statusMessage.value = "Failed to generate image. Please try again.";
+								resetLoadingState();
+							}
+						}
 
-    } catch (error) {
-        console.error("Error parsing WebSocket message:", error);
-        console.log("Raw message that caused the error:", event.data); // Log the raw message that caused the error
-    }
-};
+					} catch (error) {
+						console.error("Error parsing WebSocket message:", error);
+						console.log("Raw message that caused the error:", event.data); // Log the raw message that caused the error
+					}
+				};
 			};
 
 			reader.readAsDataURL(file);  // Convert the image to base64 for upload
@@ -372,6 +372,15 @@ export default defineComponent({
 				const generatedImageUrl = responseData.imageURL;
 				if (generatedImageUrl) {
 					imageUrl.value = generatedImageUrl;  // This should update the image URL
+
+					// Add the new image to oldImages array
+					oldImages.value.push(generatedImageUrl);
+
+					// Limit to the last 4 images
+					if (oldImages.value.length > 4) {
+						oldImages.value.splice(0, oldImages.value.length - 4);
+					}
+
 					console.log("Image URL set to:", imageUrl.value);  // Debugging log
 					statusMessage.value = "Image generated successfully!";
 					resetLoadingState();
