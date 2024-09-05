@@ -49,10 +49,33 @@
 					</select>
 				</div>
 
-				<div>
-					<label for="steps-input" class="input-label">Steps: {{ steps }}</label>
-					<input type="range" v-model="steps" id="steps-input" class="slider-input w-full" min="1" max="50" />
+				<div class="relative group">
+					<label for="steps-input" class="input-label">
+					  Steps: {{ steps }}
+					  <!-- Tooltip Trigger (Hover) -->
+					  <span class="ml-2 text-gray-400 cursor-pointer">ⓘ</span>
+					  <!-- Tooltip Content -->
+					  <div class="absolute bottom-full mb-2 hidden group-hover:block bg-gray-700 text-white text-cs p-2 z-10">
+						Min: 1, Max: 100, Default: 20<br />
+						Controls the number of iterations. Higher steps can lead to more detail but increase generation time.
+					  </div>
+					</label>
+					<input type="range" v-model="steps" id="steps-input" class="slider-input w-full" min="1" max="100" />
 				</div>
+
+				<div class="relative group">
+					<label for="seed-input" class="input-label">
+					  Seed: {{ seed || 'Random' }}
+					  <!-- Tooltip Trigger (Hover) -->
+					  <span class="ml-2 text-gray-400 cursor-pointer">ⓘ</span>
+					  <!-- Tooltip Content -->
+					  <div class="absolute bottom-full mb-2 hidden group-hover:block bg-gray-700 text-white text-sm p-2 shadow-lg w-64 z-10">
+						Min: 1, Max: 9223372036854776000<br />
+						Use the same seed to reproduce images. Leave empty for a random seed.
+					  </div>
+					</label>
+					<input type="number" v-model="seed" id="seed-input" class="number-input" min="1" :max="9223372036854776000" placeholder="Random" />
+				  </div>
 
 				<div>
 					<label for="aspect-ratio-select" class="input-label">Select Aspect Ratio:</label>
@@ -146,6 +169,8 @@ export default defineComponent({
 		ImageModal,
 	},
 	setup() {
+		const seed = ref<number | null>(null); 
+
 		const modalVisible = ref(false);
 		const textInput = ref("");
 		const model = ref("civitai:158441@358398");
@@ -331,6 +356,7 @@ export default defineComponent({
 				width: width.value,
 				model: model.value,
 				steps: steps.value,
+				seed: seed.value || undefined,  // Use user-defined seed or random if not provided
 				CFGScale: 8.0,
 				numberResults: 1,
 			};
@@ -342,13 +368,16 @@ export default defineComponent({
 
 			ws.send(JSON.stringify([imageRequest]));
 
-			statusMessage.value = `Sending image generation request ${useReferenceImage.value && imageUUID.value ? "with reference image" : ""}:
+			statusMessage.value = `Sending image generation request ${
+  useReferenceImage.value && imageUUID.value ? "with reference image" : ""
+}:
   - Model: ${model.value}
   - Width: ${width.value}px
   - Height: ${height.value}px
   - Steps: ${steps.value}
   - Preference: ${preference.value}
-  - Aspect Ratio: ${aspectRatio.value}`;
+  - Aspect Ratio: ${aspectRatio.value}
+  - Seed: ${seed.value ? seed.value : "Random"}`;
 
 			startLoadingAnimation();
 
@@ -481,6 +510,7 @@ export default defineComponent({
 			imageUUID,
 			useReferenceImage,
 			handleImageResponse,
+			seed, 
 		};
 	},
 });

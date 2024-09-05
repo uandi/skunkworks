@@ -1,6 +1,85 @@
 # skunkworks
 ![Skunkworks Logo](readme_assets/Skunk_works_Logo.svg)
-## Current Status
+## Flow Chart
+![Skunkworks Logo](readme_assets/05_09_flow.png)
+#### **Roadmap:**
+│
+├── dist/                           # Production build output
+├── node_modules/                   # Project dependencies (auto-generated)
+├── public/                         # Public assets, accessible without bundling
+├── readme_assets/                  # Assets used in documentation (e.g., logos)
+│   └── Skunk_works_Logo.svg        # Project logo
+│
+├── src/                            # Main source code directory
+│   ├── assets/                     # Static assets (fonts, styles, etc.)
+│   │   ├── fonts/                  # Font files
+│   │   └── styles.css              # Global styles
+│   ├── components/                 # Vue.js components
+│   │   ├── ImageGenerator.vue       # Component for image generation
+│   │   └── ImageModal.vue           # Modal component for displaying images
+│   ├── services/                   # Utility services and helper functions
+│   │   ├── types.ts                # TypeScript type definitions
+│   │   ├── utils.ts                # Utility functions
+│   │   └── websocket.ts            # WebSocket management
+│   ├── App.vue                     # Root Vue.js component
+│   ├── main.ts                     # Entry point for the Vue.js app
+│   └── shims-vue.d.ts              # TypeScript definitions for .vue files
+│
+├── .browserslistrc                 # Browser compatibility configuration
+├── .env                            # Environment variables
+├── .gitignore                      # Git ignored files
+├── babel.config.js                 # Babel configuration
+├── package-lock.json               # Auto-generated, locks dependency versions
+├── package.json                    # Project dependencies and scripts
+├── postcss.config.js               # PostCSS configuration (used with Tailwind CSS)
+├── README.md                       # Project documentation
+├── tailwind.config.js              # Tailwind CSS configuration
+├── tsconfig.json                   # TypeScript compiler options
+└── vue.config.js                   # Vue CLI configuration
+##### **Phase 1: Current Features**
+- **Image Generator Interface**:
+  - User inputs text prompt.
+  - User uploads reference image (optional).
+  - User selects model, steps, preference, and aspect ratio.
+  - Image generation based on text or reference image (img2img).
+  
+- **WebSocket Communication**:
+  - WebSocket setup for sending/receiving generation requests and handling images.
+  
+- **Image Output & History**:
+  - Displays generated images.
+  - Shows last 4 generated images.
+  
+- **Image Download/Preview**:
+  - Option to view and download generated images.
+
+##### **Phase 2: Improvements & Next Steps**
+- **Tooltip UI Enhancements**:
+  - Add tooltips for better user guidance, starting with concise descriptions for the 'steps' input.
+  
+- **Placeholder Replacement Logic**:
+  - Ensure placeholders are replaced dynamically by the last 4 generated images in the UI.
+  
+- **Language Support Fix**:
+  - Solve issues related to language switching in your TYPO3 CMS project.
+  
+- **Deprecated Tech Updates**:
+  - Address deprecated PHP and outdated TYPO3 versions in your other project, deciding whether to upgrade or rebuild as a static page.
+  
+##### **Phase 3: Long-term Enhancements**
+- **Improved Image Generation Control**:
+  - Add advanced controls for image generation, such as seed management and fine-tuning for better quality results.
+  
+- **WebSocket Resilience**:
+  - Enhance WebSocket connection stability and automatic reconnection strategies for better real-time performance.
+
+- **Improved Image History**:
+  - Add a feature to download a zip of previous 4 images.
+  
+- **Scalability Enhancements**:
+  - Plan to scale the backend for handling larger image generation volumes.
+
+These phases will help you progressively improve the app and address both UI and backend technical issues, while also aligning with your focus on minimal changes to maintain stability.
 
 ### Text-to-Image
 - **Status**: **Working**  
@@ -113,39 +192,3 @@ npm run build
 ### Customize configuration
 
 See [Configuration Reference](https://cli.vuejs.org/config/).
-
-
-
-│
-├── dist/                           # Production build output
-├── node_modules/                   # Project dependencies (auto-generated)
-├── public/                         # Public assets, accessible without bundling
-├── readme_assets/                  # Assets used in documentation (e.g., logos)
-│   └── Skunk_works_Logo.svg        # Project logo
-│
-├── src/                            # Main source code directory
-│   ├── assets/                     # Static assets (fonts, styles, etc.)
-│   │   ├── fonts/                  # Font files
-│   │   └── styles.css              # Global styles
-│   ├── components/                 # Vue.js components
-│   │   ├── ImageGenerator.vue       # Component for image generation
-│   │   └── ImageModal.vue           # Modal component for displaying images
-│   ├── services/                   # Utility services and helper functions
-│   │   ├── types.ts                # TypeScript type definitions
-│   │   ├── utils.ts                # Utility functions
-│   │   └── websocket.ts            # WebSocket management
-│   ├── App.vue                     # Root Vue.js component
-│   ├── main.ts                     # Entry point for the Vue.js app
-│   └── shims-vue.d.ts              # TypeScript definitions for .vue files
-│
-├── .browserslistrc                 # Browser compatibility configuration
-├── .env                            # Environment variables
-├── .gitignore                      # Git ignored files
-├── babel.config.js                 # Babel configuration
-├── package-lock.json               # Auto-generated, locks dependency versions
-├── package.json                    # Project dependencies and scripts
-├── postcss.config.js               # PostCSS configuration (used with Tailwind CSS)
-├── README.md                       # Project documentation
-├── tailwind.config.js              # Tailwind CSS configuration
-├── tsconfig.json                   # TypeScript compiler options
-└── vue.config.js                   # Vue CLI configuration
