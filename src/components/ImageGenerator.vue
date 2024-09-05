@@ -72,8 +72,8 @@
 				</div>
 
 
-				<button type="submit" :disabled="loading" class="generate-button">
-					Generate Image
+				<button @click="handleSubmit" :disabled="loading" class="generate-button">
+					{{ loading ? 'Generating...' : 'Generate Image' }}
 				</button>
 			</form>
 			<div class="col-span-2 lg:h-full flex bg-fill-secondary items-center justify-center">
@@ -308,7 +308,7 @@ export default defineComponent({
 		const handleSubmit = () => {
 			if (loading.value) {
 				statusMessage.value = "Please wait for the current request to complete.";
-				return;
+				return;  // Prevent multiple submissions
 			}
 
 			if (!ws || ws.readyState !== WebSocket.OPEN) {
@@ -316,18 +316,17 @@ export default defineComponent({
 				return;
 			}
 
-			loading.value = true;
+			loading.value = true;  // Set loading to true when starting request
 			imageUrl.value = null;
 
 			const imageRequestUUID = generateUUID();
 
-			// Base request for text-to-image
 			const imageRequest: any = {
 				taskType: "imageInference",
 				taskUUID: imageRequestUUID,
 				outputType: "URL",
 				outputFormat: "JPG",
-				positivePrompt: textInput.value,  // Text-based prompt
+				positivePrompt: textInput.value,
 				height: height.value,
 				width: width.value,
 				model: model.value,
@@ -336,28 +335,23 @@ export default defineComponent({
 				numberResults: 1,
 			};
 
-			// If the user has uploaded a reference image and checked the box, do img2img
 			if (useReferenceImage.value && imageUUID.value) {
-				imageRequest.seedImage = imageUUID.value;  // Use the uploaded image's UUID
-				imageRequest.strength = 0.8;  // Control how much the reference image influences the generation
+				imageRequest.seedImage = imageUUID.value;
+				imageRequest.strength = 0.8;
 			}
 
-			// Send the request to WebSocket
 			ws.send(JSON.stringify([imageRequest]));
 
-			// Update status message
-			statusMessage.value = `Sending image generation request ${useReferenceImage.value && imageUUID.value ? "with reference image" : ""
-				}:
-    - Model: ${model.value}
-    - Width: ${width.value}px
-    - Height: ${height.value}px
-    - Steps: ${steps.value}
-    - Preference: ${preference.value}
-    - Aspect Ratio: ${aspectRatio.value}`;
+			statusMessage.value = `Sending image generation request ${useReferenceImage.value && imageUUID.value ? "with reference image" : ""}:
+  - Model: ${model.value}
+  - Width: ${width.value}px
+  - Height: ${height.value}px
+  - Steps: ${steps.value}
+  - Preference: ${preference.value}
+  - Aspect Ratio: ${aspectRatio.value}`;
 
 			startLoadingAnimation();
 
-			// Timeout for handling the request failure
 			timeoutId = window.setTimeout(() => {
 				statusMessage.value += "\nRequest timed out. Please try again.";
 				resetLoadingState();
@@ -365,23 +359,20 @@ export default defineComponent({
 		};
 
 		const handleImageResponse = (response: WebSocketResponse) => {
-			console.log("WebSocket Response:", response);  // Log full response
-
 			const responseData = response.data[0];
 			if (responseData.taskType === "imageInference") {
 				const generatedImageUrl = responseData.imageURL;
 				if (generatedImageUrl) {
-					imageUrl.value = generatedImageUrl;  // This should update the image URL
+					imageUrl.value = generatedImageUrl;
 
 					// Add the new image to oldImages array
 					oldImages.value.push(generatedImageUrl);
 
-					// Limit to the last 4 images
+					// Ensure only the latest 4 images are kept
 					if (oldImages.value.length > 4) {
-						oldImages.value.splice(0, oldImages.value.length - 4);
+						oldImages.value.shift();  // Remove the oldest image
 					}
 
-					console.log("Image URL set to:", imageUrl.value);  // Debugging log
 					statusMessage.value = "Image generated successfully!";
 					resetLoadingState();
 				} else {
