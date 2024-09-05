@@ -150,10 +150,10 @@ export default defineComponent({
 		const textInput = ref("");
 		const model = ref("civitai:158441@358398");
 		const steps = ref(10);
-		const preference = ref("quality");
-		const aspectRatio = ref("4:3");
-		const width = ref(1024);
-		const height = ref(1024);
+		const preference = ref("speed");
+		const aspectRatio = ref("1:1");
+		const width = ref(512);
+		const height = ref(512);
 		const imageUrl = ref<string | null>(null);
 		const loading = ref(false);
 		const statusMessage = ref("");
