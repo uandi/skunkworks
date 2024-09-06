@@ -1,8 +1,27 @@
 <template>
 	<div class="image-generator-container px-8">
-		<div class="w-full text-start mb-8">
-			<h1 class="headline-text">skunkwork 1.0</h1>
-			<p class="text-white">WIP: //unstable //Beta</p>
+		<div class="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full">
+			<!-- First Column: skunkwork details -->
+			<div class="col-span-1 w-full text-start mb-8">
+				<h1 class="headline-text">skunkwork 1.0.1</h1>
+				<p class="text-white">WIP: //unstable //Beta</p>
+			</div>
+
+			<!-- Second Column: Usage Rules -->
+			<div class="col-span-1 w-full text-start mb-8">
+				<h2 class="text-lg">Usage Rules:</h2>
+				<p class="text-white text-xs">
+					Compliance with Applicable Law. You agree to abide by all applicable local, state, national,
+					and foreign laws, treaties, and regulations, in connection with your use of the Service.
+					Canva agrees to abide by all applicable local, state, national, and foreign laws, treaties,
+					and regulations, in connection with its provision of the Service.
+				</p>
+			</div>
+
+			<!-- Third Column: SVG logo on the very right -->
+			<div class="col-span-1 w-full flex items-center justify-end mb-8">
+				<img src="/Skunk_works_Logo.svg" alt="Skunkworks Logo" class="w-32 h-auto" />
+			</div>
 		</div>
 		<div class="w-full h-px bg-white my-4"></div>
 		<div class="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full">
@@ -30,56 +49,65 @@
 					<img :src="uploadedImage" alt="Reference Image"
 						class="max-w-full max-h-64 object-contain border p-2" />
 				</div>
-				<div>
-					<label for="model-select" class="input-label">Choose Model:</label>
-					<select v-model="model" id="model-select" class="select-input">
-						<option value="civitai:158441@358398">epiCRealism</option>
-						<option value="civitai:158441@358398">SocaRealism XL</option>
-						<option value="civitai:133005@471120">Juggernaut XL</option>
-					</select>
-				</div>
+				<div class="flex space-x-4">
+					<!-- Model Selection -->
+					<div class="w-1/2">
+						<label for="model-select" class="input-label">Choose Model:</label>
+						<select v-model="model" id="model-select" class="select-input w-full">
+							<option value="civitai:158441@358398">epiCRealism</option>
+							<option value="civitai:158441@358398">SocaRealism XL</option>
+							<option value="civitai:133005@471120">Juggernaut XL</option>
+						</select>
+					</div>
 
-				<div>
-					<label for="preference-select" class="input-label">
-						Select Preference:
-					</label>
-					<select v-model="preference" id="preference-select" class="select-input">
-						<option value="speed">Speed</option>
-						<option value="quality">Quality</option>
-					</select>
+					<!-- Preference Selection -->
+					<div class="w-1/2">
+						<label for="preference-select" class="input-label">Select Preference:</label>
+						<select v-model="preference" id="preference-select" class="select-input w-full">
+							<option value="speed">Speed</option>
+							<option value="quality">Quality</option>
+						</select>
+					</div>
 				</div>
 
 				<div class="relative group">
 					<label for="steps-input" class="input-label">
-					  Steps: {{ steps }}
-					  <!-- Tooltip Trigger (Hover) -->
-					  <span class="ml-2 text-gray-400 cursor-pointer">ⓘ</span>
-					  <!-- Tooltip Content -->
-					  <div class="absolute bottom-full mb-2 hidden group-hover:block bg-gray-700 text-white text-cs p-2 z-10">
-						Min: 1, Max: 100, Default: 20<br />
-						Controls the number of iterations. Higher steps can lead to more detail but increase generation time.
-					  </div>
+						Steps: {{ steps }}
+						<!-- Tooltip Trigger (Hover) -->
+						<span class="ml-2 text-gray-400 cursor-pointer">ⓘ</span>
+						<!-- Tooltip Content -->
+						<div
+							class="absolute bottom-full mb-2 hidden group-hover:block bg-gray-700 text-white text-cs p-2 z-10">
+							Min: 1, Max: 100, Default: 20<br />
+							Controls the number of iterations. Higher steps can lead to more detail but increase
+							generation time.
+						</div>
 					</label>
-					<input type="range" v-model="steps" id="steps-input" class="slider-input w-full" min="1" max="100" />
+					<input type="range" v-model="steps" id="steps-input" class="slider-input w-full" min="1"
+						max="100" />
 				</div>
 
-				<div class="relative group">
-					<label for="seed-input" class="input-label">
-					  Seed: {{ seed || 'Random' }}
-					  <!-- Tooltip Trigger (Hover) -->
-					  <span class="ml-2 text-gray-400 cursor-pointer">ⓘ</span>
-					  <!-- Tooltip Content -->
-					  <div class="absolute bottom-full mb-2 hidden group-hover:block bg-gray-700 text-white text-sm p-2 shadow-lg w-64 z-10">
-						Min: 1, Max: 9223372036854776000<br />
-						Use the same seed to reproduce images. Leave empty for a random seed.
-					  </div>
-					</label>
-					<input type="number" v-model="seed" id="seed-input" class="number-input" min="1" :max="9223372036854776000" placeholder="Random" />
-				  </div>
-
-				<div>
-					<label for="aspect-ratio-select" class="input-label">Select Aspect Ratio:</label>
-					<select v-model="aspectRatio" id="aspect-ratio-select" class="select-input">
+				<div class="flex space-x-4">
+					<!-- Seed Input -->
+					<div class="w-1/2 relative group">
+					  <label for="seed-input" class="input-label">
+						Seed: {{ seed || 'Random' }}
+						<!-- Tooltip Trigger (Hover) -->
+						<span class="ml-2 text-gray-400 cursor-pointer">ⓘ</span>
+						<!-- Tooltip Content -->
+						<div
+						  class="absolute bottom-full mb-2 hidden group-hover:block bg-gray-700 text-white text-sm p-2 shadow-lg w-64 z-10">
+						  Min: 1, Max: 9223372036854776000<br />
+						  Use the same seed to reproduce images. Leave empty for a random seed.
+						</div>
+					  </label>
+					  <input type="number" v-model="seed" id="seed-input" class="number-input w-full" min="1" :max="9223372036854776000" placeholder="Random" />
+					</div>
+				  
+					<!-- Aspect Ratio Selection -->
+					<div class="w-1/2">
+					  <label for="aspect-ratio-select" class="input-label">Select Aspect Ratio:</label>
+					  <select v-model="aspectRatio" id="aspect-ratio-select" class="select-input w-full">
 						<option value="1:1">1:1 (Square)</option>
 						<option value="16:9">16:9 (Widescreen)</option>
 						<option value="4:3">4:3 (Standard)</option>
@@ -87,8 +115,9 @@
 						<option value="21:9">21:9 (Ultra-Widescreen)</option>
 						<option value="9:16">9:16 (Portrait)</option>
 						<option value="1.85:1">1.85:1 (Cinematic)</option>
-					</select>
-				</div>
+					  </select>
+					</div>
+				  </div>
 
 				<div>
 					<p class="text-sm text-gray-400">Calculated Dimensions: {{ width }} x {{ height }}</p>
@@ -169,7 +198,7 @@ export default defineComponent({
 		ImageModal,
 	},
 	setup() {
-		const seed = ref<number | null>(null); 
+		const seed = ref<number | null>(null);
 
 		const modalVisible = ref(false);
 		const textInput = ref("");
@@ -368,9 +397,8 @@ export default defineComponent({
 
 			ws.send(JSON.stringify([imageRequest]));
 
-			statusMessage.value = `Sending image generation request ${
-  useReferenceImage.value && imageUUID.value ? "with reference image" : ""
-}:
+			statusMessage.value = `Sending image generation request ${useReferenceImage.value && imageUUID.value ? "with reference image" : ""
+				}:
   - Model: ${model.value}
   - Width: ${width.value}px
   - Height: ${height.value}px
@@ -510,7 +538,7 @@ export default defineComponent({
 			imageUUID,
 			useReferenceImage,
 			handleImageResponse,
-			seed, 
+			seed,
 		};
 	},
 });
