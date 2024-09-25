@@ -1,213 +1,202 @@
 <template>
-	<div class="image-generator-container px-8">
-	  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full">
-		<!-- First Column: skunkwork details -->
-		<div class="col-span-1 w-full text-start mb-8">
-		  <h1 class="headline-text">skunkwork 1.0.1</h1>
-		  <p class="text-white">WIP: //unstable //Beta</p>
-		</div>
-  
-		<!-- Second Column: Usage Rules -->
-		<div class="col-span-1 w-full text-start mb-8">
-		  <h2 class="text-lg">Usage Rules:</h2>
-		  <p class="text-white text-xs">
-			Compliance with Applicable Law. You agree to abide by all applicable local, state, national,
-			and foreign laws, treaties, and regulations, in connection with your use of the Service.
-			Canva agrees to abide by all applicable local, state, national, and foreign laws, treaties,
-			and regulations, in connection with its provision of the Service.
-		  </p>
-		</div>
-  
-		<!-- Third Column: SVG logo on the very right -->
-		<div class="col-span-1 w-full flex items-center justify-end mb-8">
-		  <img src="/Skunk_works_Logo.svg" alt="Skunkworks Logo" class="w-32 h-auto" />
-		</div>
-	  </div>
-	  <div class="w-full h-px bg-white my-4"></div>
-	  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full">
-		<form @submit.prevent="handleSubmit" class="form-section col-span-1 flex flex-col border-r border-white">
-		  <div>
-			<label for="text-input" class="input-label">Enter your text:</label>
-			<textarea v-model="textInput" id="text-input" rows="4" class="text-input resize-none" required
-			  placeholder="Enter your prompt">
-			</textarea>
-		  </div>
-		  <div>
-			<label for="image-upload" class="input-label">Upload Reference Image:</label>
-			<input type="file" id="image-upload" @change="handleImageUpload"
-			  accept="image/jpeg,image/png,image/webp,image/bmp,image/gif" class="file-input" />
-		  </div>
-		  <div class="flex items-baseline space-x-2">
-			<input type="checkbox" id="use-reference-image" v-model="useReferenceImage"
-			  class="form-checkbox h-3 w-3 text-green" />
-			<label for="use-reference-image" class="input-label">
-			  Use Reference Image
-			</label>
-		  </div>
-		  <div v-if="useReferenceImage && uploadedImage" class="mb-4">
-			<p class="input-label">Reference Image:</p>
-			<img :src="uploadedImage" alt="Reference Image"
-			  class="max-w-full max-h-64 object-contain border p-2" />
-		  </div>
-		  <div class="flex space-x-4">
-			<!-- Model Selection -->
-			<div class="w-1/2">
-			  <label for="model-select" class="input-label">Choose Model:</label>
-			  <select v-model="model" id="model-select" class="select-input w-full">
-				<option value="civitai:158441@358398">epiCRealism</option>
-				<option value="civitai:139562@344487">RealVisXL V4.0</option>
-				<option value="civitai:181143@203296">CG texture light and shadow</option>
-				<option value="civitai:81458@132760">AbsoluteReality</option>
-				<option value="civitai:158441@358398">SocaRealism XL</option>
-				<option value="civitai:8552@10081">dvArch</option>
-			  </select>
-			</div>
-  
-			<!-- Preference Selection -->
-			<div class="w-1/2">
-			  <label for="preference-select" class="input-label">Select Preference:</label>
-			  <select v-model="preference" id="preference-select" class="select-input w-full">
-				<option value="speed">Speed</option>
-				<option value="quality">Quality</option>
-			  </select>
-			</div>
-		  </div>
-  
-		  <div class="relative group">
-			<label for="steps-input" class="input-label">
-			  Steps: {{ steps }}
-			  <!-- Tooltip Trigger (Hover) -->
-			  <span class="ml-2 text-gray-400 cursor-pointer">ⓘ</span>
-			  <!-- Tooltip Content -->
-			  <div
-				class="absolute bottom-full mb-2 hidden group-hover:block bg-gray-700 text-white text-cs p-2 z-10">
-				Min: 1, Max: 100, Default: 20<br />
-				Controls the number of iterations. Higher steps can lead to more detail but increase
-				generation time.
-			  </div>
-			</label>
-			<input type="range" v-model="steps" id="steps-input" class="slider-input w-full" min="1"
-			  max="100" />
-		  </div>
-  
-		  <div class="flex space-x-4">
-			<!-- Seed Input -->
-			<div class="w-1/2 relative group">
-			  <label for="seed-input" class="input-label">
-				Seed: {{ seed !== null ? seed : 'Random' }}
-				<!-- Tooltip Trigger (Hover) -->
-				<span class="ml-2 text-gray-400 cursor-pointer">ⓘ</span>
-				<!-- Tooltip Content -->
-				<div
-				  class="absolute bottom-full mb-2 hidden group-hover:block bg-gray-700 text-white text-sm p-2 shadow-lg w-64 z-10">
-				  Min: 1, Max: 9223372036854776000<br />
-				  Use the same seed to reproduce images. Leave empty for a random seed.
-				</div>
-			  </label>
-			  <input type="number" v-model="seed" id="seed-input" class="number-input w-full" min="1" :max="9223372036854776000" placeholder="Random" />
-			</div>
-  
-			<!-- Aspect Ratio Selection -->
-			<div class="w-1/2">
-			  <label for="aspect-ratio-select" class="input-label">Select Aspect Ratio:</label>
-			  <select v-model="aspectRatio" id="aspect-ratio-select" class="select-input w-full">
-				<option value="1:1">1:1 (Square)</option>
-				<option value="16:9">16:9 (Widescreen)</option>
-				<option value="4:3">4:3 (Standard)</option>
-				<option value="3:2">3:2 (Classic)</option>
-				<option value="21:9">21:9 (Ultra-Widescreen)</option>
-				<option value="9:16">9:16 (Portrait)</option>
-				<option value="1.85:1">1.85:1 (Cinematic)</option>
-			  </select>
-			</div>
-		  </div>
-  
-		  <div>
-			<p class="text-sm text-gray-400">Calculated Dimensions: {{ width }} x {{ height }}</p>
-		  </div>
-  
-		  <button @click="handleSubmit" :disabled="loading" class="generate-button">
-			{{ loading ? 'Generating...' : 'Generate Image' }}
-		  </button>
-		</form>
-  
-		<!-- Image Display Section -->
-		<div class="col-span-2 lg:h-full flex bg-fill-secondary items-center justify-center rounded-lg">
-		  <div id="image-output" class="image-output w-full h-full lg:h-auto">
-			<!-- Show loading message when loading is true -->
-			<div v-if="loading" class="text-white text-center">
-			  <p>Generating image...</p>
-			</div>
-			<!-- Show the image when imageUrl is set and loading is false -->
-			<div v-else-if="imageUrl" class="flex flex-col items-center justify-center h-full">
-			  <!-- Image element using the reactive imageUrl -->
-			  <img :src="imageUrl" alt="Generated Image" class="max-h-full max-w-full object-contain p-4" />
-  
-			  <!-- Buttons for viewing and downloading the image -->
-			  <div class="flex flex-col space-y-2 mb-4">
-				<div class="flex space-x-4">
-				  <button @click="openModal" class="view-button">View Full Size</button>
-				  <button @click="downloadImage" class="download-button">Download Image</button>
-				</div>
-			  </div>
-  
-<!-- Display the seed -->
-<div class="text-white text-center mt-4">
-    <p>Seed: {{ generatedSeed }}</p> <!-- Use the generatedSeed variable to display the seed -->
-</div>
-			</div>
-  
-			<!-- Placeholder text if no image has been generated yet and not loading -->
-			<div v-else class="text-white text-center">
-			  <p>No image generated yet.</p>
-			</div>
-		  </div>
-		</div>
-  
-		<!-- Image Modal -->
-		<image-modal
-		v-if="modalVisible"
-		:isVisible="modalVisible"
-		:imageUrl="imageUrl || ''"
-		:seed="generatedSeed !== null ? generatedSeed : undefined"
-		@close="closeModal"
-	  />
-	  </div>
-  
-	  <!-- Status Messages and Old Images -->
-	  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full mt-8">
-		<div class="col-span-1 flex flex-col border-r border-white">
-		  <div class="terminal-container">
-			<div v-if="statusMessage" class="status-message">
-			  Status: <span>{{ statusMessage }}</span><span class="terminal-cursor"></span>
-			</div>
-			<div v-if="loading" id="loading-indicator" class="loading-indicator">
-			  Processing Data {{ loadingAnimation }}
-			</div>
-		  </div>
-		</div>
-		<div class="col-span-2 lg:h-full grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 auto-rows-fr">
-		  <template v-if="oldImages.length > 0">
-			<div v-for="(image, index) in oldImages.slice(-4)" :key="index"
-			  class="flex items-center justify-center cursor-pointer" @click="viewImage(image)">
-			  <img :src="image" alt="Old Generated Image" class="max-h-32 max-w-32 object-contain" />
-			</div>
-		  </template>
-		  <template v-else>
-			<!-- Placeholder for when there are no images -->
-			<div v-for="index in 4" :key="index" class="flex items-center justify-center cursor-pointer">
-			  <div
-				class="w-32 h-32 border border-white flex items-center justify-center rounded-md">
-				<p>Placeholder</p>
-			  </div>
-			</div>
-		  </template>
-		</div>
-	  </div>
-	</div>
-  </template>
+  <div class="image-generator-container px-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full">
+      <!-- First Column: skunkwork details -->
+      <div class="col-span-1 w-full text-start mb-8">
+        <h1 class="headline-text">skunkwork 1.0.1</h1>
+        <p class="text-white">WIP: //unstable //Beta</p>
+      </div>
 
-  <script lang="ts">
+      <!-- Second Column: Usage Rules -->
+      <div class="col-span-1 w-full text-start mb-8">
+        <h2 class="text-lg">Usage Rules:</h2>
+        <p class="text-white text-xs">
+          Compliance with Applicable Law. You agree to abide by all applicable local, state, national,
+          and foreign laws, treaties, and regulations, in connection with your use of the Service.
+          SkunkWorksAI agrees to abide by all applicable local, state, national, and foreign laws, treaties,
+          and regulations, in connection with its provision of the Service.
+        </p>
+      </div>
+
+      <!-- Third Column: SVG logo on the very right -->
+      <div class="col-span-1 w-full flex items-center justify-end mb-8">
+        <img src="/Skunk_works_Logo.svg" alt="Skunkworks Logo" class="w-32 h-auto" />
+      </div>
+    </div>
+    <div class="w-full h-px bg-white my-4"></div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full">
+      <form @submit.prevent="handleSubmit" class="form-section col-span-1 flex flex-col border-r border-white">
+        <div>
+          <label for="text-input" class="input-label">Enter your text:</label>
+          <textarea v-model="textInput" id="text-input" rows="4" class="text-input resize-none" required
+            placeholder="Enter your prompt">
+			</textarea>
+        </div>
+        <div>
+          <label for="image-upload" class="input-label">Upload Reference Image:</label>
+          <input type="file" id="image-upload" @change="handleImageUpload"
+            accept="image/jpeg,image/png,image/webp,image/bmp,image/gif" class="file-input" />
+        </div>
+        <div class="flex items-baseline space-x-2">
+          <input type="checkbox" id="use-reference-image" v-model="useReferenceImage"
+            class="form-checkbox h-3 w-3 text-green" />
+          <label for="use-reference-image" class="input-label">
+            Use Reference Image
+          </label>
+        </div>
+        <div v-if="useReferenceImage && uploadedImage" class="mb-4">
+          <p class="input-label">Reference Image:</p>
+          <img :src="uploadedImage" alt="Reference Image" class="max-w-full max-h-64 object-contain border p-2" />
+        </div>
+        <div class="flex space-x-4">
+          <!-- Model Selection -->
+          <div class="w-1/2">
+            <label for="model-select" class="input-label">Choose Model:</label>
+            <select v-model="model" id="model-select" class="select-input w-full">
+              <option value="civitai:158441@358398">General Purpose</option>
+              <option value="civitai:30240@102996">Cartoon</option>
+              <option value="civitai:4384@128713">CGI</option>
+            </select>
+          </div>
+
+          <!-- Preference Selection -->
+          <div class="w-1/2">
+            <label for="preference-select" class="input-label">Select Preference:</label>
+            <select v-model="preference" id="preference-select" class="select-input w-full">
+              <option value="speed">Speed</option>
+              <option value="quality">Quality</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="relative group">
+          <label for="steps-input" class="input-label">
+            Steps: {{ steps }}
+            <!-- Tooltip Trigger (Hover) -->
+            <span class="ml-2 text-gray-400 cursor-pointer">ⓘ</span>
+            <!-- Tooltip Content -->
+            <div class="absolute bottom-full mb-2 hidden group-hover:block bg-gray-700 text-white text-cs p-2 z-10">
+              Min: 1, Max: 100, Default: 20<br />
+              Controls the number of iterations. Higher steps can lead to more detail but increase
+              generation time.
+            </div>
+          </label>
+          <input type="range" v-model="steps" id="steps-input" class="slider-input w-full" min="1" max="100" />
+        </div>
+
+        <div class="flex space-x-4">
+          <!-- Seed Input -->
+          <div class="w-1/2 relative group">
+            <label for="seed-input" class="input-label">
+              Seed: {{ seed !== null ? seed : 'Random' }}
+              <!-- Tooltip Trigger (Hover) -->
+              <span class="ml-2 text-gray-400 cursor-pointer">ⓘ</span>
+              <!-- Tooltip Content -->
+              <div
+                class="absolute bottom-full mb-2 hidden group-hover:block bg-gray-700 text-white text-sm p-2 shadow-lg w-64 z-10">
+                Min: 1, Max: 9223372036854776000<br />
+                Use the same seed to reproduce images. Leave empty for a random seed.
+              </div>
+            </label>
+            <input type="number" v-model="seed" id="seed-input" class="number-input w-full" min="1"
+              :max="9223372036854776000" placeholder="Random" />
+          </div>
+
+          <!-- Aspect Ratio Selection -->
+          <div class="w-1/2">
+            <label for="aspect-ratio-select" class="input-label">Select Aspect Ratio:</label>
+            <select v-model="aspectRatio" id="aspect-ratio-select" class="select-input w-full">
+              <option value="1:1">1:1 (Square)</option>
+              <option value="16:9">16:9 (Widescreen)</option>
+              <option value="4:3">4:3 (Standard)</option>
+              <option value="3:2">3:2 (Classic)</option>
+              <option value="21:9">21:9 (Ultra-Widescreen)</option>
+              <option value="9:16">9:16 (Portrait)</option>
+              <option value="1.85:1">1.85:1 (Cinematic)</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <p class="text-sm text-gray-400">Calculated Dimensions: {{ width }} x {{ height }}</p>
+        </div>
+
+        <button @click="handleSubmit" :disabled="loading" class="generate-button">
+          {{ loading ? 'Generating...' : 'Generate Image' }}
+        </button>
+      </form>
+
+      <!-- Image Display Section -->
+      <div class="col-span-2 lg:h-full flex bg-fill-secondary items-center justify-center rounded-lg">
+        <div id="image-output" class="image-output w-full h-full lg:h-auto">
+          <!-- Show loading message when loading is true -->
+          <div v-if="loading" class="text-white text-center">
+            <p>Generating image...</p>
+          </div>
+          <!-- Show the image when imageUrl is set and loading is false -->
+          <div v-else-if="imageUrl" class="flex flex-col items-center justify-center h-full">
+            <!-- Image element using the reactive imageUrl -->
+            <img :src="imageUrl" alt="Generated Image" class="max-h-full max-w-full object-contain p-4" />
+
+            <!-- Buttons for viewing and downloading the image -->
+            <div class="flex flex-col space-y-2 mb-4">
+              <div class="flex space-x-4">
+                <button @click="openModal" class="view-button">View Full Size</button>
+                <button @click="downloadImage" class="download-button">Download Image</button>
+              </div>
+            </div>
+
+            <!-- Display the seed -->
+            <div class="text-white text-center mt-4">
+              <p>Seed: {{ generatedSeed }}</p> <!-- Use the generatedSeed variable to display the seed -->
+            </div>
+          </div>
+
+          <!-- Placeholder text if no image has been generated yet and not loading -->
+          <div v-else class="text-white text-center">
+            <p>No image generated yet.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Image Modal -->
+      <image-modal v-if="modalVisible" :isVisible="modalVisible" :imageUrl="imageUrl || ''"
+        :seed="generatedSeed !== null ? generatedSeed : undefined" @close="closeModal" />
+    </div>
+
+    <!-- Status Messages and Old Images -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full mt-8">
+      <div class="col-span-1 flex flex-col border-r border-white">
+        <div class="terminal-container">
+          <div v-if="statusMessage" class="status-message">
+            Status: <span>{{ statusMessage }}</span><span class="terminal-cursor"></span>
+          </div>
+          <div v-if="loading" id="loading-indicator" class="loading-indicator">
+            Processing Data {{ loadingAnimation }}
+          </div>
+        </div>
+      </div>
+      <div class="col-span-2 lg:h-full grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 auto-rows-fr">
+        <template v-if="oldImages.length > 0">
+          <div v-for="(image, index) in oldImages.slice(-4)" :key="index"
+            class="flex items-center justify-center cursor-pointer" @click="viewImage(image)">
+            <img :src="image" alt="Old Generated Image" class="max-h-32 max-w-32 object-contain" />
+          </div>
+        </template>
+        <template v-else>
+          <!-- Placeholder for when there are no images -->
+          <div v-for="index in 4" :key="index" class="flex items-center justify-center cursor-pointer">
+            <div class="w-32 h-32 border border-white flex items-center justify-center rounded-md">
+              <p>Placeholder</p>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script lang="ts">
 import { defineComponent, ref, watch, onMounted, computed } from "vue";
 import { initializeWebSocket } from "../services/websocket";
 import { generateUUID } from "../services/utils";
@@ -382,9 +371,8 @@ export default defineComponent({
 
       ws.send(JSON.stringify([imageRequest]));
 
-      statusMessage.value = `Sending image generation request ${
-        useReferenceImage.value && imageUUID.value ? "with reference image" : ""
-      }:
+      statusMessage.value = `Sending image generation request ${useReferenceImage.value && imageUUID.value ? "with reference image" : ""
+        }:
       - Model: ${model.value}
       - Width: ${width.value}px
       - Height: ${height.value}px
@@ -401,51 +389,51 @@ export default defineComponent({
       }, 30000); // 30 seconds timeout
     };
 
-	const handleImageResponse = (response: WebSocketResponse) => {
-  if (!response || !response.data || !Array.isArray(response.data) || response.data.length === 0) {
-    console.error("Received an invalid response or empty data array", response);
-    return;
-  }
-
-  const responseData = response.data[0]; // Access the first element safely
-
-  // Handle image upload response
-  if (responseData.taskType === "imageUpload") {
-    if (responseData.imageUUID) {
-      imageUUID.value = responseData.imageUUID;
-      statusMessage.value = "Image uploaded successfully!";
-    } else {
-      statusMessage.value = "Image upload failed.";
-    }
-  } 
-  // Handle image inference response
-  else if (responseData.taskType === "imageInference") {
-    const generatedImageUrl = responseData.imageURL;
-
-    if (generatedImageUrl) {
-      imageUrl.value = generatedImageUrl; // Set the generated image URL
-
-      // Store the seed used for the image generation
-      if (responseData.seed !== undefined) {
-        generatedSeed.value = responseData.seed;
+    const handleImageResponse = (response: WebSocketResponse) => {
+      if (!response || !response.data || !Array.isArray(response.data) || response.data.length === 0) {
+        console.error("Received an invalid response or empty data array", response);
+        return;
       }
 
-      // Add the new image to oldImages array
-      oldImages.value.push(generatedImageUrl);
+      const responseData = response.data[0]; // Access the first element safely
 
-      // Ensure only the latest 4 images are kept
-      if (oldImages.value.length > 4) {
-        oldImages.value.shift(); // Remove the oldest image
+      // Handle image upload response
+      if (responseData.taskType === "imageUpload") {
+        if (responseData.imageUUID) {
+          imageUUID.value = responseData.imageUUID;
+          statusMessage.value = "Image uploaded successfully!";
+        } else {
+          statusMessage.value = "Image upload failed.";
+        }
       }
+      // Handle image inference response
+      else if (responseData.taskType === "imageInference") {
+        const generatedImageUrl = responseData.imageURL;
 
-      statusMessage.value = "Image generated successfully!";
-      resetLoadingState(); // Reset loading state and clear animations or timeouts
-    } else {
-      statusMessage.value = "Failed to generate image. Please try again.";
-      resetLoadingState();
-    }
-  }
-};
+        if (generatedImageUrl) {
+          imageUrl.value = generatedImageUrl; // Set the generated image URL
+
+          // Store the seed used for the image generation
+          if (responseData.seed !== undefined) {
+            generatedSeed.value = responseData.seed;
+          }
+
+          // Add the new image to oldImages array
+          oldImages.value.push(generatedImageUrl);
+
+          // Ensure only the latest 4 images are kept
+          if (oldImages.value.length > 4) {
+            oldImages.value.shift(); // Remove the oldest image
+          }
+
+          statusMessage.value = "Image generated successfully!";
+          resetLoadingState(); // Reset loading state and clear animations or timeouts
+        } else {
+          statusMessage.value = "Failed to generate image. Please try again.";
+          resetLoadingState();
+        }
+      }
+    };
 
     const reinitializeWebSocket = () => {
       console.log("Reinitializing WebSocket due to model change...");
