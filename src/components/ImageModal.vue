@@ -1,14 +1,14 @@
 <template>
 	<div v-if="isVisible" class="modal-overlay">
 	  <div class="modal-content">
-		<img :src="imageUrl" alt="Full-size image" class="modal-image" />
-		<div class="flex space-x-4">
-		  <button @click="downloadImage" class="download-button">
-			Download Image
-		  </button>
-		  <button @click="$emit('close')" class="close-button">
-			Close
-		  </button>
+		<img :src="imageUrl" alt="Generated Image" class="max-w-full max-h-full" />
+		<!-- Display the seed even if it's 0 -->
+		<div v-if="seed !== null && seed !== undefined" class="text-white text-center mt-4">
+		  <p>Seed: {{ seed }}</p>
+		</div>
+		<div class="flex space-x-4 mt-4">
+		  <button @click="downloadImage" class="download-button">Download Image</button>
+		  <button @click="$emit('close')" class="close-button">Close</button>
 		</div>
 	  </div>
 	</div>
@@ -16,6 +16,7 @@
   
   <script lang="ts">
   import { defineComponent, computed } from 'vue';
+  import type { PropType } from 'vue';
   
   export default defineComponent({
 	props: {
@@ -27,6 +28,10 @@
 		type: String,
 		required: true,
 	  },
+	  seed: {
+        type: Number as PropType<number | null | undefined>, // Make sure this is updated
+        required: false,
+    },
 	},
 	setup(props) {
 	  const downloadFilename = computed(() => {
@@ -56,4 +61,3 @@
 	},
   });
   </script>
-  

@@ -192,3 +192,42 @@ npm run build
 ### Customize configuration
 
 See [Configuration Reference](https://cli.vuejs.org/config/).
+
+
+usePromptWeighting
+boolean
+Default: false
+Allow setting different weights per words or expressions in prompts.
+
+Adds 0.2 seconds to image inference time and incurs additional costs.
+
+When weighting is enabled, you can use the following syntax in prompts:
+
+Weighting
+
+Syntax: + - (word)0.9
+
+Increase or decrease the attention given to specific words or phrases.
+
+Examples:
+
+Single words: small+ dog, pixar style
+Multiple words: small dog, (pixar style)-
+Multiple symbols for more effect: small+++ dog, pixar style
+Nested weighting: (small+ dog)++, pixar style
+Explicit weight percentage: small dog, (pixar)1.2 style
+Blend
+
+Syntax: .blend()
+
+Merge multiple conditioning prompts.
+
+Example: ("small dog", "robot").blend(1, 0.8)
+
+Conjunction
+
+Syntax: .and()
+
+Break a prompt into multiple clauses and pass them separately.
+
+Example: ("small dog", "pixar style").and()

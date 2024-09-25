@@ -52,23 +52,23 @@ body {
 }
 
 .form-section {
-    @apply pr-4 space-y-4 h-full;
+    @apply pr-4 space-y-4 h-full ;
 }
 
 .input-label {
-    @apply block text-sm font-medium mb-2 text-gray-secondary-alt;
+    @apply block text-sm font-medium mb-2 text-gray-secondary-alt rounded-lg;
 }
 
 .text-input,
 .select-input,
 .number-input {
-    @apply w-full p-2 border bg-black text-white border-white focus:outline-none focus:ring focus:ring-fill-gray-tertiary;
+    @apply w-full p-2 border bg-black text-white border-white focus:outline-none focus:ring focus:ring-fill-gray-tertiary rounded-lg;
 }
 
 
 
 .image-output {
-    @apply flex items-center justify-center h-full;
+    @apply flex items-center justify-center h-full ;
 }
 
 /* Terminal-like status message styling */
@@ -99,6 +99,7 @@ body {
       background-size: 1.5em 1.5em;
       padding-right: 2.5rem;
       appearance: none;
+      @apply rounded-lg
     }
   
     .select-input {
@@ -135,11 +136,11 @@ body {
 
 /* Modal Styles */
 .modal-overlay {
-    @apply fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 z-50;
+    @apply fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 z-50 rounded-lg;
 }
 
 .modal-content {
-    @apply border-white p-4 flex flex-col items-center relative;
+    @apply border-white p-4 flex flex-col items-center relative rounded-lg;
 }
 
 .close-button,
@@ -147,7 +148,7 @@ body {
 .view-button,
 .download-button,
 .preview-button {
-    @apply border border-white text-white px-4 py-2 cursor-pointer;
+    @apply border border-white text-white px-4 py-2 cursor-pointer rounded-lg;
 }
 
 .close-button, 
@@ -163,6 +164,6 @@ body {
 }
 
 .file-input {
-    @apply w-full p-2 border bg-black text-white border-white focus:outline-none focus:ring focus:ring-fill-gray-tertiary;
+    @apply w-full p-2 border bg-black text-white border-white focus:outline-none focus:ring focus:ring-fill-gray-tertiary rounded-lg;
 }
 
