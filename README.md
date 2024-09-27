@@ -90,24 +90,59 @@ Mit dieser Anleitung sind Sie bestens gerüstet, um den Text-zu-Bild-Generator e
 ## Flow Chart
 ![Skunkworks Logo](readme_assets/05_09_flow.png)
 #### **Roadmap:**
-│
+Based on the screenshot you provided, here's the updated project structure reflecting the contents of your project:
+
+```
 ├── dist/                           # Production build output
+│   ├── css/                        # Compiled CSS files
+│   ├── fonts/                      # Compiled font files
+│   ├── js/                         # Compiled JavaScript files
+│   ├── favicon.ico                 # Favicon for the application
+│   ├── index.html                  # Main HTML file for production
+│   └── Skunk_works_Logo.svg        # Project logo
+│
 ├── node_modules/                   # Project dependencies (auto-generated)
+│
 ├── public/                         # Public assets, accessible without bundling
+│   ├── favicon.ico                 # Favicon for the application
+│   ├── index.html                  # Main HTML file for development
+│   └── Skunk_works_Logo.svg        # Project logo
+│
 ├── readme_assets/                  # Assets used in documentation (e.g., logos)
+│   ├── 05_09_flow.png              # Example flow image for documentation
 │   └── Skunk_works_Logo.svg        # Project logo
 │
 ├── src/                            # Main source code directory
 │   ├── assets/                     # Static assets (fonts, styles, etc.)
 │   │   ├── fonts/                  # Font files
+│   │   │   ├── JetBrainsMono-Bold.woff2
+│   │   │   ├── JetBrainsMono-BoldItalic.woff2
+│   │   │   ├── JetBrainsMono-ExtraBold.woff2
+│   │   │   ├── JetBrainsMono-ExtraBoldItalic.woff2
+│   │   │   ├── JetBrainsMono-ExtraLight.woff2
+│   │   │   ├── JetBrainsMono-ExtraLightItalic.woff2
+│   │   │   ├── JetBrainsMono-Italic.woff2
+│   │   │   ├── JetBrainsMono-Light.woff2
+│   │   │   ├── JetBrainsMono-LightItalic.woff2
+│   │   │   ├── JetBrainsMono-Medium.woff2
+│   │   │   ├── JetBrainsMono-MediumItalic.woff2
+│   │   │   ├── JetBrainsMono-Regular.woff2
+│   │   │   ├── JetBrainsMono-SemiBold.woff2
+│   │   │   ├── JetBrainsMono-SemiBoldItalic.woff2
+│   │   │   ├── JetBrainsMono-Thin.woff2
+│   │   │   └── JetBrainsMono-ThinItalic.woff2
 │   │   └── styles.css              # Global styles
+│   │
 │   ├── components/                 # Vue.js components
-│   │   ├── ImageGenerator.vue       # Component for image generation
-│   │   └── ImageModal.vue           # Modal component for displaying images
+│   │   ├── ImageGenerator.vue      # Component for image generation
+│   │   └── ImageModal.vue          # Modal component for displaying images
+│   │
 │   ├── services/                   # Utility services and helper functions
+│   │   ├── generation.ts           # Image generation logic
 │   │   ├── types.ts                # TypeScript type definitions
 │   │   ├── utils.ts                # Utility functions
 │   │   └── websocket.ts            # WebSocket management
+│   │
 │   ├── App.vue                     # Root Vue.js component
 │   ├── main.ts                     # Entry point for the Vue.js app
 │   └── shims-vue.d.ts              # TypeScript definitions for .vue files
@@ -123,6 +158,8 @@ Mit dieser Anleitung sind Sie bestens gerüstet, um den Text-zu-Bild-Generator e
 ├── tailwind.config.js              # Tailwind CSS configuration
 ├── tsconfig.json                   # TypeScript compiler options
 └── vue.config.js                   # Vue CLI configuration
+```
+
 ##### **Phase 1: Current Features**
 - **Image Generator Interface**:
   - User inputs text prompt.

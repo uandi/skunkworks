@@ -68,6 +68,19 @@
             </select>
           </div>
         </div>
+        <div class="relative group">
+          <label for="cfgscale-input" class="input-label">
+            CFG Scale: {{ cfgScale }}
+            <!-- Tooltip Trigger (Hover) -->
+            <span class="ml-2 text-gray-400 cursor-pointer">ⓘ</span>
+            <!-- Tooltip Content -->
+            <div class="absolute bottom-full mb-2 hidden group-hover:block bg-gray-700 text-white text-cs p-2 z-10">
+              Min: 0, Max: 30, Default: 7<br />
+              Guidance scale represents how closely the images will resemble the prompt. Higher values are closer to the prompt. Low values may reduce the quality of the results.
+            </div>
+          </label>
+          <input type="range" v-model="cfgScale" id="cfgscale-input" class="slider-input w-full" min="0" max="30" />
+        </div>
 
         <div class="relative group">
           <label for="steps-input" class="input-label">
@@ -210,6 +223,7 @@ export default defineComponent({
   setup() {
     const seed = ref<number | null>(null); // User-provided seed
     const generatedSeed = ref<number | null>(null); // Seed used in the generated image
+    const cfgScale = ref(7); // Default value for CFG Scale
     const modalVisible = ref(false);
     const textInput = ref("");
     const model = ref("civitai:158441@358398");
@@ -359,7 +373,7 @@ export default defineComponent({
         model: model.value,
         steps: steps.value,
         seed: seed.value || undefined, // Include seed only if provided
-        CFGScale: 8.0,
+        CFGScale: cfgScale.value, // Include the CFG Scale value
         numberResults: 1,
       };
 
@@ -512,6 +526,7 @@ export default defineComponent({
       textInput,
       model,
       steps,
+      cfgScale,
       preference,
       aspectRatio,
       width,
