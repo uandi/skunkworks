@@ -76,7 +76,8 @@
             <!-- Tooltip Content -->
             <div class="absolute bottom-full mb-2 hidden group-hover:block bg-gray-700 text-white text-cs p-2 z-10">
               Min: 0, Max: 30, Default: 7<br />
-              Guidance scale represents how closely the images will resemble the prompt. Higher values are closer to the prompt. Low values may reduce the quality of the results.
+              Guidance scale represents how closely the images will resemble the prompt. Higher values are closer to the
+              prompt. Low values may reduce the quality of the results.
             </div>
           </label>
           <input type="range" v-model="cfgScale" id="cfgscale-input" class="slider-input w-full" min="0" max="30" />
@@ -99,9 +100,10 @@
 
         <div class="flex space-x-4">
           <!-- Seed Input -->
+          <!-- Add this to the seed input field section for initial random seed value -->
           <div class="w-1/2 relative group">
             <label for="seed-input" class="input-label">
-              Seed: {{ seed !== null ? seed : 'Random' }}
+              Seed: {{ generatedSeed !== null ? generatedSeed : 'Random' }}
               <!-- Tooltip Trigger (Hover) -->
               <span class="ml-2 text-gray-400 cursor-pointer">ⓘ</span>
               <!-- Tooltip Content -->
@@ -114,6 +116,7 @@
             <input type="number" v-model="seed" id="seed-input" class="number-input w-full" min="1"
               :max="9223372036854776000" placeholder="Random" />
           </div>
+
 
           <!-- Aspect Ratio Selection -->
           <div class="w-1/2">
@@ -221,6 +224,10 @@ export default defineComponent({
     ImageModal,
   },
   setup() {
+    const generateRandomSeed = () => {
+      return Math.floor(Math.random() * 9223372036854776000) + 1;
+    };
+
     const seed = ref<number | null>(null); // User-provided seed
     const generatedSeed = ref<number | null>(null); // Seed used in the generated image
     const cfgScale = ref(7); // Default value for CFG Scale
@@ -358,7 +365,7 @@ export default defineComponent({
 
       loading.value = true; // Set loading to true when starting request
       imageUrl.value = null;
-      generatedSeed.value = null; // Reset generated seed
+      generatedSeed.value = seed.value || generateRandomSeed(); // Use provided seed or generate new random seed
 
       const imageRequestUUID = generateUUID();
 
@@ -372,8 +379,8 @@ export default defineComponent({
         width: width.value,
         model: model.value,
         steps: steps.value,
-        seed: seed.value || undefined, // Include seed only if provided
-        CFGScale: cfgScale.value, // Include the CFG Scale value
+        seed: generatedSeed.value, // Send the seed used
+        CFGScale: cfgScale.value,  // Include the CFG Scale value
         numberResults: 1,
       };
 
@@ -393,7 +400,7 @@ export default defineComponent({
       - Steps: ${steps.value}
       - Preference: ${preference.value}
       - Aspect Ratio: ${aspectRatio.value}
-      - Seed: ${seed.value !== null ? seed.value : "Random"}`;
+      - Seed: ${generatedSeed.value !== null ? generatedSeed.value : "Random"}`;
 
       startLoadingAnimation();
 
@@ -469,8 +476,11 @@ export default defineComponent({
       updateStatusMessage(`Authenticated successfully with model: ${model.value}`);
     });
 
+    // Generate and set initial random seed on component mount
     onMounted(() => {
-      reinitializeWebSocket();
+      seed.value = generateRandomSeed(); // Set initial random seed
+      reinitializeWebSocket(); // Initialize WebSocket connection
+
       setInterval(() => {
         if (ws && ws.readyState === WebSocket.OPEN) {
           const pingMessage = { taskType: "ping", ping: true };
