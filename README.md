@@ -1,4 +1,5 @@
 [![Netlify Status](https://api.netlify.com/api/v1/badges/8c10417f-6bda-4b49-be69-270c28680a7b/deploy-status)](https://app.netlify.com/sites/skunkworksai/deploys)
+https://skunkworksai.netlify.app
 # skunkworks
 ![Skunkworks Logo](readme_assets/Skunk_works_Logo.svg)
 ### Anleitung zur Nutzung des Text-zu-Bild-Generators
