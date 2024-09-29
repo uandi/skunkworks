@@ -102,7 +102,7 @@
           <!-- Add this to the seed input field section for initial random seed value -->
           <div class="w-1/2 relative group">
             <label for="seed-input" class="input-label">
-              Seed: {{ generatedSeed !== null ? generatedSeed : 'Random' }}
+              Seed: {{ seed !== null ? seed : 'Random' }}
               <!-- Tooltip Trigger (Hover) -->
               <span class="ml-2 text-gray-400 cursor-pointer">ⓘ</span>
               <!-- Tooltip Content -->
@@ -112,21 +112,20 @@
                 Use the same seed to reproduce images. Leave empty for a random seed.
               </div>
             </label>
-            <input type="number" v-model="seed" id="seed-input" class="number-input w-full" min="1"
-              :max="9223372036854776000" placeholder="Random" />
+            <input type="number" v-model="seedInput" id="seed-input" class="number-input w-full" min="1" :max="9223372036854776000" placeholder="Random" />
           </div>
 
 
 
-            <!-- Aspect Ratio Selection -->
-  <div class="w-1/2">
-    <label for="aspect-ratio-select" class="input-label">Select Aspect Ratio:</label>
-    <select v-model="aspectRatio" id="aspect-ratio-select" class="select-input w-full">
-      <option value="1:1">1:1 (Square)</option>
-      <option value="3:2">3:2 (Classic)</option>
-      <option value="2:3">2:3 (Reverse)</option>
-    </select>
-  </div>
+          <!-- Aspect Ratio Selection -->
+          <div class="w-1/2">
+            <label for="aspect-ratio-select" class="input-label">Select Aspect Ratio:</label>
+            <select v-model="aspectRatio" id="aspect-ratio-select" class="select-input w-full">
+              <option value="1:1">1:1 (Square)</option>
+              <option value="3:2">3:2 (Classic)</option>
+              <option value="2:3">2:3 (Reverse)</option>
+            </select>
+          </div>
 
         </div>
 
@@ -225,13 +224,14 @@ export default defineComponent({
       return Math.floor(Math.random() * 9223372036854776000) + 1;
     };
 
-    const seed = ref<number | null>(null); // User-provided seed
+    const seed = ref<number | null>(null); // Seed used in generation (random by default)
+    const seedInput = ref<number | null>(null); // Define seedInput
     const generatedSeed = ref<number | null>(null); // Seed used in the generated image
     const cfgScale = ref(7); // Default value for CFG Scale
     const modalVisible = ref(false);
     const textInput = ref("");
     const model = ref("civitai:158441@358398");
-    const selectedMode = ref("speed"); 
+    const selectedMode = ref("speed");
     const steps = ref(15);
 
     const aspectRatio = ref("1:1");
@@ -266,66 +266,66 @@ export default defineComponent({
     };
 
     const calculateDimensions = () => {
-  const minDimension = 512; // Minimum dimension size
-  const maxDimension = 2048; // Maximum dimension size
+      const minDimension = 512; // Minimum dimension size
+      const maxDimension = 2048; // Maximum dimension size
 
-  let aspectWidth, aspectHeight;
+      let aspectWidth, aspectHeight;
 
-  // Set aspect ratio dimensions based on selected aspectRatio value
-  switch (aspectRatio.value) {
-    case "3:2":
-      aspectWidth = 3;
-      aspectHeight = 2;
-      break;
-    case "2:3":
-      aspectWidth = 2;
-      aspectHeight = 3;
-      break;
-    case "1:1":
-    default:
-      aspectWidth = 1;
-      aspectHeight = 1;
-      break;
-  }
+      // Set aspect ratio dimensions based on selected aspectRatio value
+      switch (aspectRatio.value) {
+        case "3:2":
+          aspectWidth = 3;
+          aspectHeight = 2;
+          break;
+        case "2:3":
+          aspectWidth = 2;
+          aspectHeight = 3;
+          break;
+        case "1:1":
+        default:
+          aspectWidth = 1;
+          aspectHeight = 1;
+          break;
+      }
 
-  // Determine the max possible dimension based on the selected mode
-  let baseDimension;
-  switch (selectedMode.value) {
-    case "quality":
-      baseDimension = 1024;
-      break;
-    case "hd":
-      baseDimension = 2048;
-      break;
-    case "speed":
-    default:
-      baseDimension = 512;
-      break;
-  }
+      // Determine the max possible dimension based on the selected mode
+      let baseDimension;
+      switch (selectedMode.value) {
+        case "quality":
+          baseDimension = 1024;
+          break;
+        case "hd":
+          baseDimension = 2048;
+          break;
+        case "speed":
+        default:
+          baseDimension = 512;
+          break;
+      }
 
-  // Calculate width and height while respecting minimum and maximum dimensions
-  if (aspectWidth >= aspectHeight) {
-    width.value = Math.max(minDimension, Math.min(baseDimension, maxDimension));
-    height.value = Math.max(
-      minDimension,
-      Math.min(Math.round((baseDimension * aspectHeight) / aspectWidth), maxDimension)
-    );
-  } else {
-    height.value = Math.max(minDimension, Math.min(baseDimension, maxDimension));
-    width.value = Math.max(
-      minDimension,
-      Math.min(Math.round((baseDimension * aspectWidth) / aspectHeight), maxDimension)
-    );
-  }
+      // Calculate width and height while respecting minimum and maximum dimensions
+      if (aspectWidth >= aspectHeight) {
+        width.value = Math.max(minDimension, Math.min(baseDimension, maxDimension));
+        height.value = Math.max(
+          minDimension,
+          Math.min(Math.round((baseDimension * aspectHeight) / aspectWidth), maxDimension)
+        );
+      } else {
+        height.value = Math.max(minDimension, Math.min(baseDimension, maxDimension));
+        width.value = Math.max(
+          minDimension,
+          Math.min(Math.round((baseDimension * aspectWidth) / aspectHeight), maxDimension)
+        );
+      }
 
-  // Ensure dimensions are multiples of 64
-  width.value = Math.round(width.value / 64) * 64;
-  height.value = Math.round(height.value / 64) * 64;
+      // Ensure dimensions are multiples of 64
+      width.value = Math.round(width.value / 64) * 64;
+      height.value = Math.round(height.value / 64) * 64;
 
-  // Ensure dimensions are within the valid range
-  width.value = Math.max(minDimension, Math.min(width.value, maxDimension));
-  height.value = Math.max(minDimension, Math.min(height.value, maxDimension));
-};
+      // Ensure dimensions are within the valid range
+      width.value = Math.max(minDimension, Math.min(width.value, maxDimension));
+      height.value = Math.max(minDimension, Math.min(height.value, maxDimension));
+    };
     const startLoadingAnimation = () => {
       const frames = [".  ", ".. ", "...", " ..", "  .", "   "];
       let frameIndex = 0;
@@ -368,60 +368,62 @@ export default defineComponent({
     };
 
     const handleSubmit = () => {
-  if (loading.value) {
-    statusMessage.value = "Please wait for the current request to complete.";
-    return; // Prevent multiple submissions
-  }
+      if (loading.value) {
+        statusMessage.value = "Please wait for the current request to complete.";
+        return; // Prevent multiple submissions
+      }
 
-  if (!ws || ws.readyState !== WebSocket.OPEN) {
-    statusMessage.value = "WebSocket connection is not ready. Please wait.";
-    return;
-  }
+      if (!ws || ws.readyState !== WebSocket.OPEN) {
+        statusMessage.value = "WebSocket connection is not ready. Please wait.";
+        return;
+      }
 
-  loading.value = true; // Set loading to true when starting request
-  imageUrl.value = null;
-  generatedSeed.value = seed.value || generateRandomSeed(); // Use provided seed or generate new random seed
+      loading.value = true; // Set loading to true when starting request
+      imageUrl.value = null;
 
-  const imageRequestUUID = generateUUID();
+      // If user has not provided a seed, generate a random one
+      seed.value = seedInput.value || Math.floor(Math.random() * 9223372036854776000) + 1;
 
-  const imageRequest: any = {
-    taskType: "imageInference",
-    taskUUID: imageRequestUUID,
-    outputType: "URL",
-    outputFormat: "JPG",
-    positivePrompt: textInput.value,
-    height: height.value,
-    width: width.value,
-    model: model.value,
-    steps: steps.value,
-    seed: generatedSeed.value, // Send the seed used
-    CFGScale: cfgScale.value, // Include the CFG Scale value
-    numberResults: 1,
-  };
+      const imageRequestUUID = generateUUID();
 
-  // Include reference image if used
-  if (useReferenceImage.value && imageUUID.value) {
-    imageRequest.seedImage = imageUUID.value;
-    imageRequest.strength = 0.8;
-  }
+      const imageRequest: any = {
+        taskType: "imageInference",
+        taskUUID: imageRequestUUID,
+        outputType: "URL",
+        outputFormat: "JPG",
+        positivePrompt: textInput.value,
+        height: height.value,
+        width: width.value,
+        model: model.value,
+        steps: steps.value,
+        seed: seed.value,  // Use the generated or user-provided seed
+        CFGScale: cfgScale.value,  // Include the CFG Scale value
+        numberResults: 1,
+      };
 
-  ws.send(JSON.stringify([imageRequest]));
+      // Include reference image if used
+      if (useReferenceImage.value && imageUUID.value) {
+        imageRequest.seedImage = imageUUID.value;
+        imageRequest.strength = 0.8;
+      }
 
-  statusMessage.value = `Sending image generation request ${useReferenceImage.value && imageUUID.value ? "with reference image" : ""}:
-  - Model: ${model.value}
-  - Width: ${width.value}px
-  - Height: ${height.value}px
-  - Steps: ${steps.value}
-  - Mode: ${selectedMode.value}
-  - Seed: ${generatedSeed.value !== null ? generatedSeed.value : "Random"}`;
+      ws.send(JSON.stringify([imageRequest]));
 
-  startLoadingAnimation();
+      statusMessage.value = `Sending image generation request:
+    - Model: ${model.value}
+    - Width: ${width.value}px
+    - Height: ${height.value}px
+    - Steps: ${steps.value}
+    - Seed: ${seed.value !== null ? seed.value : "Random"}`;
 
-  timeoutId = window.setTimeout(() => {
-    statusMessage.value += "\nRequest timed out. Please try again.";
-    resetLoadingState();
-  }, 30000); // 30 seconds timeout
-};
+      startLoadingAnimation();
+
+      timeoutId = window.setTimeout(() => {
+        statusMessage.value += "\nRequest timed out. Please try again.";
+        resetLoadingState();
+      }, 30000); // 30 seconds timeout
+    };
+
 
     const handleImageResponse = (response: WebSocketResponse) => {
       if (!response || !response.data || !Array.isArray(response.data) || response.data.length === 0) {
@@ -490,22 +492,22 @@ export default defineComponent({
     });
 
     onMounted(() => {
-  seed.value = generateRandomSeed(); // Set initial random seed
-  reinitializeWebSocket(); // Initialize WebSocket connection
+      seed.value = generateRandomSeed(); // Set initial random seed
+      reinitializeWebSocket(); // Initialize WebSocket connection
 
-  calculateDimensions(); // Set initial dimensions based on current preference and aspect ratio
+      calculateDimensions(); // Set initial dimensions based on current preference and aspect ratio
 
-  setInterval(() => {
-    if (ws && ws.readyState === WebSocket.OPEN) {
-      const pingMessage = { taskType: "ping", ping: true };
-      ws.send(JSON.stringify([pingMessage]));
-      updateStatusMessage("Ping message sent to keep connection alive.");
-    }
-  }, 60000);
-});
+      setInterval(() => {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          const pingMessage = { taskType: "ping", ping: true };
+          ws.send(JSON.stringify([pingMessage]));
+          updateStatusMessage("Ping message sent to keep connection alive.");
+        }
+      }, 60000);
+    });
 
-// Watch for changes in preference and aspect ratio to recalculate dimensions
-watch([selectedMode, aspectRatio], calculateDimensions, { immediate: true });
+    // Watch for changes in preference and aspect ratio to recalculate dimensions
+    watch([selectedMode, aspectRatio], calculateDimensions, { immediate: true });
 
     const openModal = () => {
       modalVisible.value = true;
@@ -577,7 +579,8 @@ watch([selectedMode, aspectRatio], calculateDimensions, { immediate: true });
       handleImageResponse,
       seed,
       generatedSeed,
-      selectedMode, 
+      selectedMode,
+      seedInput
 
     };
   },
