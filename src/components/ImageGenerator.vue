@@ -56,6 +56,9 @@
             <label for="model-select" class="input-label">Choose Model:</label>
             <select v-model="model" id="model-select" class="select-input w-full">
               <option value="civitai:158441@358398">General Purpose</option>
+              <option value="civitai:4384@128713">Unreal Engine</option>
+              <option value="civitai:8030@261539">Analog Realistic</option>
+              <option value="civitai:30240@102996">Cartoon</option>
             </select>
           </div>
 

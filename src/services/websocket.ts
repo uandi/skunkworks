@@ -19,9 +19,7 @@ export function initializeWebSocket(
 
     const apiKey = process.env.VUE_APP_API_KEY || "";
     if (!apiKey) {
-      console.error(
-        "API Key is missing! Please set VUE_APP_API_KEY in your environment."
-      );
+      console.error("API Key is missing! Please set VUE_APP_API_KEY in your environment.");
       ws.close(); // Close WebSocket if no API key
       return;
     }
@@ -48,19 +46,21 @@ export function initializeWebSocket(
       const response: WebSocketResponse = JSON.parse(event.data);
       console.log("Parsed WebSocket response:", response); // Log the parsed response
 
-      // Handle authentication errors separately
+      // Check for task type and seed presence
+      const taskType = response.data[0]?.taskType;
+      if (taskType === "imageInference") {
+        if (response.data[0].seed !== undefined) {
+          console.log('Seed received:', response.data[0].seed);
+        } else {
+          console.warn('Seed is missing from the response.');
+        }
+      }
+
+      // Handle authentication errors
       if (response.data && response.data[0].errorMessage) {
         console.error("Authentication failed:", response.data[0].errorMessage);
         ws.close(); // Optionally close the WebSocket connection
         return;
-      }
-
-      // Ensure different task types are handled properly
-      const taskType = response.data[0]?.taskType;
-      if (taskType === "imageInference") {
-        console.log("Handling image inference task...");
-      } else if (taskType === "imageUpload") {
-        console.log("Handling image upload task...");
       }
 
       // Pass the parsed response to the provided callback
@@ -74,13 +74,6 @@ export function initializeWebSocket(
 
   ws.onerror = (error: Event) => {
     console.error("WebSocket error occurred:", error);
-
-    // Provide more detailed information on the error for debugging purposes
-    if (error instanceof ErrorEvent) {
-      console.error("Error event message:", error.message);
-    } else {
-      console.error("Non-error event:", error);
-    }
 
     if (onErrorCallback) {
       onErrorCallback(error);
