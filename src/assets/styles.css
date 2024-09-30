@@ -35,7 +35,7 @@
 
 /* Apply JetBrains Mono globally */
 body {
-    @apply font-code text-white text-sm;
+    @apply font-code text-white text-sm bg-black p-12;
 }
 
 /* Tailwind and other styles */
@@ -45,7 +45,10 @@ body {
 
 /* Custom styles for the image generator */
 .image-generator-container {
-    @apply flex flex-col items-center justify-center min-h-screen bg-black;
+    @apply flex flex-col items-center justify-center min-h-screen;
+    max-width: 1280px; 
+    margin: 0 auto;
+
 }
 .headline-text {
     @apply text-4xl font-bold text-white;
