@@ -34,7 +34,8 @@
             placeholder="Enter your prompt">
           </textarea>
         </div>
-        <div>
+
+        <!-- <div>
           <label for="image-upload" class="input-label">Upload Reference Image:</label>
           <input type="file" id="image-upload" @change="handleImageUpload"
             accept="image/jpeg,image/png,image/webp,image/bmp,image/gif" class="file-input" />
@@ -49,7 +50,8 @@
         <div v-if="useReferenceImage && uploadedImage" class="mb-4">
           <p class="input-label">Reference Image:</p>
           <img :src="uploadedImage" alt="Reference Image" class="max-w-full max-h-64 object-contain border p-2" />
-        </div>
+        </div> -->
+        
         <div class="flex space-x-4">
           <!-- Model Selection -->
           <div class="w-1/2">
@@ -109,7 +111,7 @@
             <label for="seed-input" class="input-label">
               Seed: {{ seed !== null ? seed : "Random" }}
               <!-- Tooltip Trigger (Hover) -->
-              <span class="ml-2 text-gray-400 cursor-pointer">ⓘ</span>
+              <!-- <span class="ml-2 text-gray-400 cursor-pointer">ⓘ</span> -->
               <!-- Tooltip Content -->
               <div
                 class="absolute bottom-full mb-2 hidden group-hover:block bg-gray-700 text-white text-sm p-2 shadow-lg w-64 z-10">

@@ -167,3 +167,37 @@ body {
     @apply w-full p-2 border bg-black text-white border-white focus:outline-none focus:ring focus:ring-fill-gray-tertiary rounded-lg;
 }
 
+  /* Preloader Overlay */
+  .preloader-overlay {
+	@apply fixed inset-0 flex items-center justify-center bg-black z-50;
+  }
+  
+  /* Preloader Content */
+  .preloader-content {
+	@apply flex flex-col items-center;
+  }
+  
+  /* Preloader Logo */
+  .preloader-logo {
+	@apply w-32 h-auto;
+  }
+  
+  /* Preloader Headline */
+  .preloader-headline {
+	@apply text-2xl font-bold text-white mt-4;
+  }
+  
+  /* Preloader Spinner */
+  .preloader-spinner {
+	@apply mt-4 w-10 h-10 border-4 border-t-4 border-gray-400 border-t-transparent rounded-full animate-spin;
+  }
+  
+  /* Spinner Animation */
+  @keyframes spin {
+	0% {
+	  transform: rotate(0deg);
+	}
+	100% {
+	  transform: rotate(360deg);
+	}
+  }
