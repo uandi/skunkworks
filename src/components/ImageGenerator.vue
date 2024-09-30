@@ -11,10 +11,12 @@
       <div class="col-span-1 w-full text-start mb-8">
         <h2 class="text-lg">Usage Rules:</h2>
         <p class="text-white text-xs">
-          Compliance with Applicable Law. You agree to abide by all applicable local, state, national,
-          and foreign laws, treaties, and regulations, in connection with your use of the Service.
-          SkunkWorksAI agrees to abide by all applicable local, state, national, and foreign laws, treaties,
-          and regulations, in connection with its provision of the Service.
+          Compliance with Applicable Law. You agree to abide by all applicable
+          local, state, national, and foreign laws, treaties, and regulations,
+          in connection with your use of the Service. SkunkWorksAI agrees to
+          abide by all applicable local, state, national, and foreign laws,
+          treaties, and regulations, in connection with its provision of the
+          Service.
         </p>
       </div>
 
@@ -30,7 +32,7 @@
           <label for="text-input" class="input-label">Enter your text:</label>
           <textarea v-model="textInput" id="text-input" rows="4" class="text-input resize-none" required
             placeholder="Enter your prompt">
-			</textarea>
+          </textarea>
         </div>
         <div>
           <label for="image-upload" class="input-label">Upload Reference Image:</label>
@@ -65,7 +67,6 @@
               <option value="hd">HD (Max Size)</option>
             </select>
           </div>
-
         </div>
         <div class="relative group">
           <label for="cfgscale-input" class="input-label">
@@ -75,8 +76,9 @@
             <!-- Tooltip Content -->
             <div class="absolute bottom-full mb-2 hidden group-hover:block bg-gray-700 text-white text-cs p-2 z-10">
               Min: 0, Max: 30, Default: 7<br />
-              Guidance scale represents how closely the images will resemble the prompt. Higher values are closer to the
-              prompt. Low values may reduce the quality of the results.
+              Guidance scale represents how closely the images will resemble the
+              prompt. Higher values are closer to the prompt. Low values may
+              reduce the quality of the results.
             </div>
           </label>
           <input type="range" v-model="cfgScale" id="cfgscale-input" class="slider-input w-full" min="0" max="30" />
@@ -90,8 +92,8 @@
             <!-- Tooltip Content -->
             <div class="absolute bottom-full mb-2 hidden group-hover:block bg-gray-700 text-white text-cs p-2 z-10">
               Min: 1, Max: 100, Default: 20<br />
-              Controls the number of iterations. Higher steps can lead to more detail but increase
-              generation time.
+              Controls the number of iterations. Higher steps can lead to more
+              detail but increase generation time.
             </div>
           </label>
           <input type="range" v-model="steps" id="steps-input" class="slider-input w-full" min="1" max="100" />
@@ -102,20 +104,20 @@
           <!-- Add this to the seed input field section for initial random seed value -->
           <div class="w-1/2 relative group">
             <label for="seed-input" class="input-label">
-              Seed: {{ seed !== null ? seed : 'Random' }}
+              Seed: {{ seed !== null ? seed : "Random" }}
               <!-- Tooltip Trigger (Hover) -->
               <span class="ml-2 text-gray-400 cursor-pointer">ⓘ</span>
               <!-- Tooltip Content -->
               <div
                 class="absolute bottom-full mb-2 hidden group-hover:block bg-gray-700 text-white text-sm p-2 shadow-lg w-64 z-10">
                 Min: 1, Max: 9223372036854776000<br />
-                Use the same seed to reproduce images. Leave empty for a random seed.
+                Use the same seed to reproduce images. Leave empty for a random
+                seed.
               </div>
             </label>
-            <input type="number" v-model="seedInput" id="seed-input" class="number-input w-full" min="1" :max="9223372036854776000" placeholder="Random" />
+            <input type="number" v-model="seedInput" id="seed-input" class="number-input w-full" min="1"
+              :max="9223372036854776000" placeholder="Random" />
           </div>
-
-
 
           <!-- Aspect Ratio Selection -->
           <div class="w-1/2">
@@ -126,15 +128,16 @@
               <option value="2:3">2:3 (Reverse)</option>
             </select>
           </div>
-
         </div>
 
         <div>
-          <p class="text-sm text-gray-400">Calculated Dimensions: {{ width }} x {{ height }}</p>
+          <p class="text-sm text-gray-400">
+            Calculated Dimensions: {{ width }} x {{ height }}
+          </p>
         </div>
 
         <button @click="handleSubmit" :disabled="loading" class="generate-button">
-          {{ loading ? 'Generating...' : 'Generate Image' }}
+          {{ loading ? "Generating..." : "Generate Image" }}
         </button>
       </form>
 
@@ -153,14 +156,19 @@
             <!-- Buttons for viewing and downloading the image -->
             <div class="flex flex-col space-y-2 mb-4">
               <div class="flex space-x-4">
-                <button @click="openModal" class="view-button">View Full Size</button>
-                <button @click="downloadImage" class="download-button">Download Image</button>
+                <button @click="openModal" class="view-button">
+                  View Full Size
+                </button>
+                <button @click="downloadImage" class="download-button">
+                  Download Image
+                </button>
               </div>
             </div>
 
             <!-- Display the seed -->
             <div class="text-white text-center mt-4">
-              <p>Seed: {{ generatedSeed }}</p> <!-- Use the generatedSeed variable to display the seed -->
+              <p>Seed: {{ generatedSeed }}</p>
+              <!-- Use the generatedSeed variable to display the seed -->
             </div>
           </div>
 
@@ -226,7 +234,7 @@ export default defineComponent({
 
     const seed = ref<number | null>(null); // Seed used in generation (random by default)
     const seedInput = ref<number | null>(null); // Define seedInput
-    const generatedSeed = ref<number | null>(null); // Seed used in the generated image
+    const generatedSeed = ref<number | null>(null);
     const cfgScale = ref(7); // Default value for CFG Scale
     const modalVisible = ref(false);
     const textInput = ref("");
@@ -305,16 +313,28 @@ export default defineComponent({
 
       // Calculate width and height while respecting minimum and maximum dimensions
       if (aspectWidth >= aspectHeight) {
-        width.value = Math.max(minDimension, Math.min(baseDimension, maxDimension));
-        height.value = Math.max(
-          minDimension,
-          Math.min(Math.round((baseDimension * aspectHeight) / aspectWidth), maxDimension)
-        );
-      } else {
-        height.value = Math.max(minDimension, Math.min(baseDimension, maxDimension));
         width.value = Math.max(
           minDimension,
-          Math.min(Math.round((baseDimension * aspectWidth) / aspectHeight), maxDimension)
+          Math.min(baseDimension, maxDimension)
+        );
+        height.value = Math.max(
+          minDimension,
+          Math.min(
+            Math.round((baseDimension * aspectHeight) / aspectWidth),
+            maxDimension
+          )
+        );
+      } else {
+        height.value = Math.max(
+          minDimension,
+          Math.min(baseDimension, maxDimension)
+        );
+        width.value = Math.max(
+          minDimension,
+          Math.min(
+            Math.round((baseDimension * aspectWidth) / aspectHeight),
+            maxDimension
+          )
         );
       }
 
@@ -324,7 +344,10 @@ export default defineComponent({
 
       // Ensure dimensions are within the valid range
       width.value = Math.max(minDimension, Math.min(width.value, maxDimension));
-      height.value = Math.max(minDimension, Math.min(height.value, maxDimension));
+      height.value = Math.max(
+        minDimension,
+        Math.min(height.value, maxDimension)
+      );
     };
     const startLoadingAnimation = () => {
       const frames = [".  ", ".. ", "...", " ..", "  .", "   "];
@@ -369,7 +392,8 @@ export default defineComponent({
 
     const handleSubmit = () => {
       if (loading.value) {
-        statusMessage.value = "Please wait for the current request to complete.";
+        statusMessage.value =
+          "Please wait for the current request to complete.";
         return; // Prevent multiple submissions
       }
 
@@ -382,7 +406,8 @@ export default defineComponent({
       imageUrl.value = null;
 
       // If user has not provided a seed, generate a random one
-      seed.value = seedInput.value || Math.floor(Math.random() * 9223372036854776000) + 1;
+      seed.value =
+        seedInput.value || Math.floor(Math.random() * 9223372036854776000) + 1;
 
       const imageRequestUUID = generateUUID();
 
@@ -396,8 +421,8 @@ export default defineComponent({
         width: width.value,
         model: model.value,
         steps: steps.value,
-        seed: seed.value,  // Use the generated or user-provided seed
-        CFGScale: cfgScale.value,  // Include the CFG Scale value
+        seed: seed.value, // Use the generated or user-provided seed
+        CFGScale: cfgScale.value, // Include the CFG Scale value
         numberResults: 1,
       };
 
@@ -424,47 +449,63 @@ export default defineComponent({
       }, 30000); // 30 seconds timeout
     };
 
-
     const handleImageResponse = (response: WebSocketResponse) => {
-      if (!response || !response.data || !Array.isArray(response.data) || response.data.length === 0) {
-        console.error("Received an invalid response or empty data array", response);
+      // Check if response or response data is valid
+      if (
+        !response ||
+        !response.data ||
+        !Array.isArray(response.data) ||
+        response.data.length === 0
+      ) {
+        console.error(
+          "Received an invalid response or empty data array",
+          response
+        );
         return;
       }
 
-      const responseData = response.data[0]; // Access the first element safely
+      // Access the first element safely
+      const responseData = response.data[0];
 
       // Handle image upload response
       if (responseData.taskType === "imageUpload") {
         if (responseData.imageUUID) {
-          imageUUID.value = responseData.imageUUID;
+          imageUUID.value = responseData.imageUUID; // Save the image UUID from the response
           statusMessage.value = "Image uploaded successfully!";
         } else {
           statusMessage.value = "Image upload failed.";
         }
       }
-      // Handle image inference response
+      // Handle image inference response (image generation)
       else if (responseData.taskType === "imageInference") {
-        const generatedImageUrl = responseData.imageURL;
+        const generatedImageUrl = responseData.imageURL; // Get the generated image URL from the response
 
         if (generatedImageUrl) {
-          imageUrl.value = generatedImageUrl; // Set the generated image URL
+          // Set the generated image URL to display
+          imageUrl.value = generatedImageUrl;
 
-          // Store the seed used for the image generation
-          if (responseData.seed !== undefined) {
+          // Check if the seed is available and set it; if not, use the fallback
+          if (responseData.seed !== undefined && responseData.seed !== null) {
             generatedSeed.value = responseData.seed;
+            console.log("Seed received and set:", generatedSeed.value); // Debugging
+          } else {
+            console.warn("Seed is missing from the response. Using fallback.");
+            generatedSeed.value = seed.value; // Fallback to the initially generated or provided seed
           }
 
-          // Add the new image to oldImages array
+          // Add the new image to the oldImages array to keep history
           oldImages.value.push(generatedImageUrl);
 
           // Ensure only the latest 4 images are kept
           if (oldImages.value.length > 4) {
-            oldImages.value.shift(); // Remove the oldest image
+            oldImages.value.shift(); // Remove the oldest image from the array
           }
 
+          // Update status message to inform the user of success
           statusMessage.value = "Image generated successfully!";
-          resetLoadingState(); // Reset loading state and clear animations or timeouts
+          resetLoadingState(); // Reset loading state and clear any ongoing animations or timeouts
         } else {
+          // If the image URL is not in the response, show an error
           statusMessage.value = "Failed to generate image. Please try again.";
           resetLoadingState();
         }
@@ -478,17 +519,23 @@ export default defineComponent({
       }
       setTimeout(() => {
         ws = initializeWebSocket(handleImageResponse, () => {
-          updateStatusMessage(`Authenticated successfully with model: ${model.value}`);
+          updateStatusMessage(
+            `Authenticated successfully with model: ${model.value}`
+          );
         });
       }, 500);
     };
 
-    watch([selectedMode, aspectRatio], calculateDimensions, { immediate: true });
+    watch([selectedMode, aspectRatio], calculateDimensions, {
+      immediate: true,
+    });
 
     watch(model, () => {
       console.log(`Model changed to: ${model.value}`);
       reinitializeWebSocket();
-      updateStatusMessage(`Authenticated successfully with model: ${model.value}`);
+      updateStatusMessage(
+        `Authenticated successfully with model: ${model.value}`
+      );
     });
 
     onMounted(() => {
@@ -507,7 +554,9 @@ export default defineComponent({
     });
 
     // Watch for changes in preference and aspect ratio to recalculate dimensions
-    watch([selectedMode, aspectRatio], calculateDimensions, { immediate: true });
+    watch([selectedMode, aspectRatio], calculateDimensions, {
+      immediate: true,
+    });
 
     const openModal = () => {
       modalVisible.value = true;
@@ -580,8 +629,7 @@ export default defineComponent({
       seed,
       generatedSeed,
       selectedMode,
-      seedInput
-
+      seedInput,
     };
   },
 });
