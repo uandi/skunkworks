@@ -45,8 +45,8 @@ body {
 
 /* Custom styles for the image generator */
 .image-generator-container {
-    @apply flex flex-col items-center justify-center min-h-screen;
-    max-width: 1280px; 
+    @apply flex flex-col items-center justify-center;
+    max-width: 1440px;
     margin: 0 auto;
 
 }

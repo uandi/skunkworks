@@ -126,7 +126,7 @@
 
           <!-- Aspect Ratio Selection -->
           <div class="w-1/2">
-            <label for="aspect-ratio-select" class="input-label">Select Aspect Ratio:</label>
+            <label for="aspect-ratio-select" class="input-label">Select<br>Aspect Ratio:</label>
             <select v-model="aspectRatio" id="aspect-ratio-select" class="select-input w-full">
               <option value="1:1">1:1 (Square)</option>
               <option value="3:2">3:2 (Classic)</option>
@@ -141,9 +141,14 @@
           </p>
         </div>
 
-        <button @click="handleSubmit" :disabled="loading" class="generate-button">
-          {{ loading ? "Generating..." : "Generate Image" }}
-        </button>
+        <div class="flex flex-col items-start w-full">
+          <button @click="handleSubmit" :disabled="loading" class="generate-button mb-2 w-full">
+            {{ loading ? "Generating..." : "Generate Image" }}
+          </button>
+          <p class="text-xs text-gray-400 text-start">
+            By generating, you accept the terms and agree that you are solely responsible for the images you create, not the service provider.
+          </p>
+        </div>
       </form>
 
       <!-- Image Display Section -->
@@ -171,7 +176,7 @@
             </div>
 
             <!-- Display the seed -->
-            <div class="text-white text-center mt-4">
+            <div class="text-white text-center my-4">
               <p>Seed: {{ generatedSeed }}</p>
               <!-- Use the generatedSeed variable to display the seed -->
             </div>
@@ -201,22 +206,81 @@
           </div>
         </div>
       </div>
-      <div class="col-span-2 lg:h-full grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 auto-rows-fr">
-        <template v-if="oldImages.length > 0">
-          <div v-for="(image, index) in oldImages.slice(-4)" :key="index"
-            class="flex items-center justify-center cursor-pointer" @click="viewImage(image)">
-            <img :src="image" alt="Old Generated Image" class="max-h-32 max-w-32 object-contain" />
-          </div>
-        </template>
-        <template v-else>
-          <!-- Placeholder for when there are no images -->
-          <div v-for="index in 4" :key="index" class="flex items-center justify-center cursor-pointer">
-            <div class="w-32 h-32 border border-white flex items-center justify-center rounded-md">
-              <p>Placeholder</p>
+      <div class="col-span-2 lg:h-full grid gap-4 auto-rows-fr justify-items-start">
+        <div class="flex w-full justify-between">
+          <template v-if="oldImages.length > 0">
+            <div
+              v-for="(image, index) in oldImages.slice(-4)"
+              :key="index"
+              class="cursor-pointer hover:opacity-80 transition-opacity duration-200 m-2"
+              @click="viewImage(image)"
+            >
+            <img
+            :src="image"
+            alt="Old Generated Image"
+            class="max-h-24 md:max-h-32 lg:max-h-40 max-w-24 md:max-w-32 lg:max-w-40 object-contain"
+          />
             </div>
-          </div>
-        </template>
+          </template>
+          <template v-else>
+            <div
+              v-for="index in 4"
+              :key="index"
+              class="cursor-pointer"
+            >
+              <div class="w-32 h-32 border border-white flex items-center justify-center rounded-md">
+                <p>Placeholder</p>
+              </div>
+            </div>
+          </template>
+        </div>
       </div>
+    </div>
+
+
+    <div class="w-full h-px bg-white my-4"></div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full">
+      <!-- First Column: skunkwork details -->
+      <div class="col-span-1 w-full text-start mb-8">
+        <h2 class="text-lg">Text-to-Image:</h2>
+        <p class="text-white text-xs">
+          Generate images from descriptive text prompts. This process translates your text
+          into high-quality visuals, allowing you to create detailed and vivid images based on your ideas.
+        </p>
+      </div>
+
+      <!-- Second Column: Usage Rules -->
+      <div class="col-span-2 w-full text-start mb-8">
+        <h2 class="text-lg mb-2">Text-to-Image Generation:</h2>
+        <ul class="text-white text-xs space-y-1">
+          <li class="flex items-start">
+            <span class="inline-block w-4 shrink-0 mr-2">•</span>
+            <span>Goal: Generate a simple image based on a straightforward text description.</span>
+          </li>
+          <li class="flex items-start">
+            <span class="inline-block w-4 shrink-0 mr-2">•</span>
+            <span>User enters a descriptive text prompt, e.g., "A sunset over the ocean with palm trees."</span>
+          </li>
+          <li class="flex items-start">
+            <span class="inline-block w-4 shrink-0 mr-2">•</span>
+            <span>User leaves the default values for other parameters like steps, CFGScale, and dimensions.</span>
+          </li>
+          <li class="flex items-start">
+            <span class="inline-block w-4 shrink-0 mr-2">•</span>
+            <span>User selects the default model, e.g., epiCRealism.</span>
+          </li>
+          <li class="flex items-start">
+            <span class="inline-block w-4 shrink-0 mr-2">•</span>
+            <span>User clicks the "Generate Image" button.</span>
+          </li>
+          <li class="flex items-start">
+            <span class="inline-block w-4 shrink-0 mr-2">•</span>
+            <span>The generated image appears with the seed number displayed below it.</span>
+          </li>
+        </ul>
+      </div>
+
+
     </div>
   </div>
 </template>
