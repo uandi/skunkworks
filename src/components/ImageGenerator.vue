@@ -9,14 +9,9 @@
 
       <!-- Second Column: Usage Rules -->
       <div class="col-span-1 w-full text-start mb-8">
-        <h2 class="text-lg">Usage Rules:</h2>
+        <h2 class="text-lg">Prompt Guide:</h2>
         <p class="text-white text-xs">
-          Compliance with Applicable Law. You agree to abide by all applicable
-          local, state, national, and foreign laws, treaties, and regulations,
-          in connection with your use of the Service. SkunkWorksAI agrees to
-          abide by all applicable local, state, national, and foreign laws,
-          treaties, and regulations, in connection with its provision of the
-          Service.
+          Use concise descriptions and combine elements like “mountains + cityscape.” Emphasize with (object:1.5) or reduce with (object:0.5). Use + for strong additions and / for blending. Add light effects like (soft glow:1.3) or moods like (mystical atmosphere:1.4). Experiment with layering (multiple objects in one prompt), textures (e.g., “smooth, rough”), and color specifics (“vivid colors”, “monochrome”). Mix time periods (e.g., “ancient + futuristic”).
         </p>
       </div>
 
@@ -30,9 +25,7 @@
       <form @submit.prevent="handleSubmit" class="form-section col-span-1 flex flex-col border-r border-white">
         <div>
           <label for="text-input" class="input-label">Enter your text:</label>
-          <textarea v-model="textInput" id="text-input" rows="4" class="text-input resize-none" required
-            placeholder="Enter your prompt">
-          </textarea>
+          <textarea v-model="textInput" id="text-input" rows="6" class="text-input resize-none" required></textarea>
         </div>
 
         <!-- <div>
@@ -306,10 +299,10 @@ export default defineComponent({
     const generatedSeed = ref<number | null>(null);
     const cfgScale = ref(7); // Default value for CFG Scale
     const modalVisible = ref(false);
-    const textInput = ref("");
+    const textInput = ref("(majestic mountain range:1.5), +sunset in the background, (soft glowing light:1.3), clouds gently hovering over the mountains, (mystical atmosphere:1.4), contrasting the futuristic city, +harmonious blend of nature and urban environment.");
     const model = ref("civitai:158441@358398");
     const selectedMode = ref("speed");
-    const steps = ref(15);
+    const steps = ref(20);
 
     const aspectRatio = ref("1:1");
     const width = ref(512);
