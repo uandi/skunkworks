@@ -317,18 +317,18 @@ export default defineComponent({
     const generatedSeed = ref<number | null>(null);
     const cfgScale = ref(7); // Default value for CFG Scale
     const modalVisible = ref(false);
-    const textInput = ref("(majestic mountain range:1.5), +sunset in the background, (soft glowing light:1.3), clouds gently hovering over the mountains, (mystical atmosphere:1.4), contrasting the futuristic city, +harmonious blend of nature and urban environment.");
+    const textInput = ref("(majestic mountain range:1.5), +sunset in the background, (soft glowing light:1.3), clouds gently hovering over the mountains, (mystical atmosphere:1.4)");
     const model = ref("civitai:788550@915279");
-    const selectedMode = ref("speed");
+    const selectedMode = ref("quality");
     const steps = ref(20);
 
     const selectedModelOption = ref("civitai:788550@915279"); // Tracks dropdown selection
     const customModelId = ref(""); // Stores user-entered model ID
     const modelIdError = ref(""); // Stores validation error message
 
-    const aspectRatio = ref("1:1");
-    const width = ref(512);
-    const height = ref(512);
+    const aspectRatio = ref("3:2");
+    const width = ref(1024);
+    const height = ref(704);
     const imageUrl = ref<string | null>(null);
     const loading = ref(false);
     const statusMessage = ref("");
@@ -530,7 +530,7 @@ export default defineComponent({
       timeoutId = window.setTimeout(() => {
         statusMessage.value += "\nRequest timed out. Please try again.";
         resetLoadingState();
-      }, 30000); // 30 seconds timeout
+      }, 60000); // 30 seconds timeout
     };
 
     const handleImageResponse = (response: WebSocketResponse) => {
