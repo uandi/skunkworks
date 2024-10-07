@@ -50,7 +50,7 @@
           <div class="w-1/2">
             <label for="model-select" class="input-label">Choose Model:</label>
             <select v-model="model" id="model-select" class="select-input w-full">
-              <option value="civitai:158441@358398">General Purpose</option>
+              <option value="civitai:788550@915279">General Purpose</option>
               <option value="civitai:4384@128713">Unreal Engine</option>
               <option value="civitai:8030@261539">Analog Realistic</option>
               <option value="civitai:30240@102996">Cartoon</option>
@@ -300,7 +300,7 @@ export default defineComponent({
     const cfgScale = ref(7); // Default value for CFG Scale
     const modalVisible = ref(false);
     const textInput = ref("(majestic mountain range:1.5), +sunset in the background, (soft glowing light:1.3), clouds gently hovering over the mountains, (mystical atmosphere:1.4), contrasting the futuristic city, +harmonious blend of nature and urban environment.");
-    const model = ref("civitai:158441@358398");
+    const model = ref("civitai:788550@915279");
     const selectedMode = ref("speed");
     const steps = ref(20);
 
