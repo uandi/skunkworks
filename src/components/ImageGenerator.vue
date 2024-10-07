@@ -50,6 +50,7 @@
           <div class="w-1/2">
             <label for="model-select" class="input-label">Choose Model:</label>
             <select v-model="selectedModelOption" id="model-select" class="select-input w-full">
+              <option value="civitai:618692@691639">Flux 1.1 (Text)</option>
               <option value="civitai:788550@915279">General Purpose</option>
               <option value="civitai:4384@128713">Unreal Engine</option>
               <option value="civitai:8030@261539">Analog Realistic</option>
@@ -317,12 +318,12 @@ export default defineComponent({
     const generatedSeed = ref<number | null>(null);
     const cfgScale = ref(7); // Default value for CFG Scale
     const modalVisible = ref(false);
-    const textInput = ref("(majestic mountain range:1.5), +sunset in the background, (soft glowing light:1.3), clouds gently hovering over the mountains, (mystical atmosphere:1.4)");
-    const model = ref("civitai:788550@915279");
+    const textInput = ref("A logo for a mobile business named 'Mobile World'+. The text 'Mobile World'+ is in orange and is placed on a grey background. There is an animated mobile cartoon character with orange hair and glasses in the background. The character is holding a mobile phone and is standing on a cloud.");
+    const model = ref("civitai:618692@691639");
     const selectedMode = ref("quality");
     const steps = ref(20);
 
-    const selectedModelOption = ref("civitai:788550@915279"); // Tracks dropdown selection
+    const selectedModelOption = ref("civitai:618692@691639"); // Tracks dropdown selection
     const customModelId = ref(""); // Stores user-entered model ID
     const modelIdError = ref(""); // Stores validation error message
 
