@@ -46,14 +46,15 @@
         </div> -->
         
         <div class="flex space-x-4">
-          <!-- Model Selection -->
+          <!-- Model Selection (Dropdown and Custom Input) -->
           <div class="w-1/2">
             <label for="model-select" class="input-label">Choose Model:</label>
-            <select v-model="model" id="model-select" class="select-input w-full">
+            <select v-model="selectedModelOption" id="model-select" class="select-input w-full">
               <option value="civitai:788550@915279">General Purpose</option>
               <option value="civitai:4384@128713">Unreal Engine</option>
               <option value="civitai:8030@261539">Analog Realistic</option>
               <option value="civitai:30240@102996">Cartoon</option>
+              <option value="other">Other</option>
             </select>
           </div>
 
@@ -66,6 +67,23 @@
             </select>
           </div>
         </div>
+
+        <!-- Custom Model ID Input -->
+        <div class="w-full mb-4">
+          <!-- <div class="w-full mb-4" v-if="selectedModelOption === 'other'"> -->
+          <label for="custom-model-id" class="input-label">Choose ‘Other’ to Enter Model ID:</label>
+          <input
+            type="text"
+            v-model="customModelId"
+            id="custom-model-id"
+            class="text-input w-full"
+            placeholder="civitai:123456@789012"
+          />
+          <p v-if="modelIdError" class="text-red-500 text-xs mt-1">{{ modelIdError }}</p>
+        </div>
+
+
+        
         <div class="relative group">
           <label for="cfgscale-input" class="input-label">
             CFG Scale: {{ cfgScale }}
@@ -303,6 +321,10 @@ export default defineComponent({
     const model = ref("civitai:788550@915279");
     const selectedMode = ref("speed");
     const steps = ref(20);
+
+    const selectedModelOption = ref("civitai:788550@915279"); // Tracks dropdown selection
+    const customModelId = ref(""); // Stores user-entered model ID
+    const modelIdError = ref(""); // Stores validation error message
 
     const aspectRatio = ref("1:1");
     const width = ref(512);
@@ -600,6 +622,22 @@ export default defineComponent({
       );
     });
 
+    watch([selectedModelOption, customModelId], ([newOption, newCustomId]) => {
+  if (newOption === "other") {
+    // Validate the custom model ID format
+    const modelIdPattern = /^civitai:\d+@\d+$/;
+    if (modelIdPattern.test(newCustomId)) {
+      model.value = newCustomId;
+      modelIdError.value = "";
+    } else {
+      modelIdError.value = "Invalid model ID format. Expected format: civitai:123456@789012";
+    }
+  } else {
+    model.value = newOption;
+    customModelId.value = "";
+    modelIdError.value = "";
+  }
+});
     onMounted(() => {
       seed.value = generateRandomSeed(); // Set initial random seed
       reinitializeWebSocket(); // Initialize WebSocket connection
@@ -692,6 +730,9 @@ export default defineComponent({
       generatedSeed,
       selectedMode,
       seedInput,
+      selectedModelOption,
+      customModelId,
+      modelIdError,
     };
   },
 });
